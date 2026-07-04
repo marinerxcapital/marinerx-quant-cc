@@ -1,0 +1,46 @@
+[project]
+name = "marinerx-cc"
+version = "0.1.0"
+description = "MarinerX Quant Command Center"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "sqlalchemy>=2.0",
+    "aiosqlite",
+    "duckdb>=0.10",
+    "pandas>=2.2",
+    "polars>=1.0",
+    "numpy",
+    "python-dotenv",
+    "structlog",
+    "typer[all]>=0.12",
+    "fastapi",
+    "uvicorn[standard]",
+    "plotly",
+    "textual",
+    "apscheduler",
+    "tenacity",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff", "mypy"]
+
+[project.scripts]
+mcc = "main:cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+strict = true
+files = ["src"]
+ignore_missing_imports = true
