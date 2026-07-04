@@ -3,7 +3,7 @@ FROM python:3.11-slim AS builder
 RUN pip install --no-cache-dir uv
 WORKDIR /app
 COPY pyproject.toml .
-RUN uv sync --frozen || pip install -e ".[dev]"
+RUN uv sync || pip install -e ".[dev]"
 COPY . .
 
 FROM python:3.11-slim AS runtime
