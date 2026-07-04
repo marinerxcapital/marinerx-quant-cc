@@ -75,6 +75,17 @@ async def websocket_endpoint(websocket: WebSocket):
             "ts": getattr(snap, "ts_utc", None).isoformat() if getattr(snap, "ts_utc", None) else None
         })
 
+        # Seed some live data so the dashboard is immediately interesting (triggers the real Validation/Decision/Execution spine)
+        try:
+            from datetime import datetime, timezone
+            from mcc.core.events import Event, Topic
+            for sym in ["NQ", "ES"]:
+                bar = Event(Topic.BAR, datetime.now(timezone.utc), "dashboard", {"symbol": sym, "c": 15020 + (hash(sym) % 80)})
+                await sup.bus.publish(bar)
+                await asyncio.sleep(0.15)
+        except Exception:
+            pass
+
         # Bridge bus events to this client (throttled)
         async def forwarder():
             # Subscribe to key topics
