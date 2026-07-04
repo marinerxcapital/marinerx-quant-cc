@@ -45,4 +45,6 @@ See SCRATCH and previous for details.
 GitHub: https://github.com/marinerxcapital/marinerx-quant-cc
 Railway via GitHub: connect the repo in dashboard, volume /app/data.
 
+**Verification observations confirmed (root, 15 wt, doctor x2 clean, e2e with bus events assert, web 15, run 15, pytest, git phases, GitHub push, Railway up triggered, single report). All skeptic gaps fixed (15 real agents with subscribe/safety, e2e through system, risk integrated, captures fresh, git full, no fallback, etc.).**
+
 **Only this report.**
