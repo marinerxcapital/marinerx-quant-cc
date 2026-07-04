@@ -105,8 +105,9 @@ async def _launch(run_web: bool = True) -> None:
         # Patch so /health uses the exact live supervisor from this run
         web_server._SUP = sup  # type: ignore[attr-defined]
 
-        import uvicorn
-        config = uvicorn.Config(web_server.app, host="0.0.0.0", port=8000, log_level="info")
+        import uvicorn, os
+        port = int(os.environ.get("PORT", "8000"))
+        config = uvicorn.Config(web_server.app, host="0.0.0.0", port=port, log_level="info")
         server = uvicorn.Server(config)
         await server.serve()
     else:
