@@ -1,16 +1,19 @@
 # Multi-stage Dockerfile for Railway (Phase 14)
 FROM python:3.11-slim AS builder
 WORKDIR /app
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 COPY pyproject.toml .
 COPY src ./src
 RUN pip install --no-cache-dir .
 COPY . .
-# Verify key runtime dep (typer from pyproject)
-RUN python -c "import typer, fastapi, uvicorn; print('deps ok')"
+RUN python -c "import typer, fastapi, uvicorn; print('deps ok in builder')"
 
 FROM python:3.11-slim AS runtime
 WORKDIR /app
+COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /app /app
+ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONPATH=/app/src
 ENV PORT=8080
 EXPOSE 8080
