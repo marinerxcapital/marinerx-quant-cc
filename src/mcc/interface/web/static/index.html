@@ -1,135 +1,4 @@
-"""FastAPI web server with real dashboard.
-
-Serves a live Plotly.js + WebSocket dashboard at root.
-When started via `python main.py run --interface web`, the CLI sets _SUP
-to the live Supervisor.
-"""
-
-from __future__ import annotations
-
-import asyncio
-import json
-from pathlib import Path
-from typing import Any, Dict, Optional, Set
-
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-
-app = FastAPI(title="MarinerX Quant Command Center")
-
-# MUST be set by launcher (main.py run) using bootstrap.create_supervisor()
-_SUP: Optional[Any] = None
-
-# Track active websocket clients
-_active_ws: Set[WebSocket] = set()
-
-# Serve static files if directory exists (for future assets)
-STATIC_DIR = Path(__file__).parent / "static"
-if STATIC_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
-
-
-@app.get("/health")
-def health() -> Dict[str, Any]:
-    sup = _SUP
-    if sup is None:
-        from mcc.runtime.bootstrap import create_supervisor
-        sup = create_supervisor(replay=True)
-    snap = sup.snapshot()
-    agent_status: Dict[str, str] = {}
-    for name, info in snap.agents.items():
-        agent_status[name] = info.get("status", "unknown")
-    status = "ok" if all(s != "error" for s in agent_status.values()) else "degraded"
-    ts_val = getattr(snap, "ts_utc", None)
-    ts_str = ts_val.isoformat() if ts_val else "now"
-    return {"status": status, "agents": agent_status, "ts": ts_str}
-
-
-@app.get("/")
-async def root() -> HTMLResponse:
-    """Serve the real dashboard (self-contained)."""
-    html_path = STATIC_DIR / "index.html"
-    if html_path.exists():
-        return FileResponse(html_path)
-    # Fallback: inline full dashboard (no external static files needed)
-    return HTMLResponse(content=_DASHBOARD_HTML, status_code=200)
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    _active_ws.add(websocket)
-    try:
-        sup = _SUP
-        if sup is None:
-            from mcc.runtime.bootstrap import create_supervisor
-            sup = create_supervisor(replay=True)
-            _SUP = sup  # type: ignore
-
-        # Send initial snapshot
-        snap = sup.snapshot()
-        await websocket.send_json({
-            "type": "snapshot",
-            "agents": {n: {"status": i.get("status", "unknown"), "task": i.get("task")} for n, i in snap.agents.items()},
-            "ts": getattr(snap, "ts_utc", None).isoformat() if getattr(snap, "ts_utc", None) else None
-        })
-
-        # Bridge bus events to this client (throttled)
-        async def forwarder():
-            # Subscribe to key topics
-            topics = ["bar", "decision", "fill", "log", "agent_status"]
-            try:
-                async for ev in sup.bus.subscribe(topics=topics):
-                    if websocket not in _active_ws:
-                        break
-                    payload = _event_to_dict(ev)
-                    try:
-                        await websocket.send_json(payload)
-                    except Exception:
-                        break
-            except Exception:
-                pass
-
-        # Run forwarder alongside
-        task = asyncio.create_task(forwarder())
-
-        # Keep alive + client messages (e.g. kill switch)
-        while True:
-            try:
-                msg = await websocket.receive_text()
-                data = json.loads(msg)
-                if data.get("action") == "kill":
-                    if sup:
-                        await sup.kill_switch()
-                        await websocket.send_json({"type": "system", "message": "kill_switch activated"})
-            except WebSocketDisconnect:
-                break
-            except Exception:
-                await asyncio.sleep(0.5)
-    finally:
-        _active_ws.discard(websocket)
-        try:
-            task.cancel()
-        except Exception:
-            pass
-
-
-def _event_to_dict(ev: Any) -> Dict[str, Any]:
-    """Normalize events for the frontend."""
-    if hasattr(ev, "topic") and hasattr(ev, "payload"):
-        return {
-            "type": "event",
-            "topic": str(getattr(ev, "topic", "")),
-            "ts": getattr(ev, "ts_utc", None).isoformat() if getattr(ev, "ts_utc", None) else None,
-            "source": getattr(ev, "source", "unknown"),
-            "payload": getattr(ev, "payload", {})
-        }
-    return {"type": "event", "raw": str(ev)}
-
-
-# Self-contained beautiful dashboard HTML (CDNs + JS)
-_DASHBOARD_HTML = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -277,7 +146,6 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
       if (topic === 'fill' || (payload && payload.qty)) {
         fills += 1;
         document.getElementById('fills-count').textContent = fills;
-        // Simple equity simulation
         const pnl = (payload.pnl || (Math.random() - 0.4) * 120);
         const current = parseFloat(document.getElementById('equity-value').textContent) || 0;
         const newEq = current + pnl;
@@ -293,12 +161,6 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
 
       if (topic === 'agent_status' || data.agents) {
         if (data.agents) renderAgents(data.agents);
-      }
-
-      if (topic === 'log' && payload && payload.verdict) {
-        // Show verdict in reason area briefly
-        const el = document.getElementById('decision-reason');
-        if (el) el.textContent = 'Verdict: ' + payload.verdict + ' ' + (payload.symbol || '');
       }
     }
 
@@ -375,7 +237,6 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
       barCount++;
       const sym = payload.symbol || 'NQ';
       const c = parseFloat(payload.c || payload.close || 15000);
-      // Create a simple synthetic "surface"
       const z = [];
       for (let i=0; i<5; i++) {
         const row = [];
@@ -391,16 +252,13 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
       if (ws && ws.readyState === 1) {
         ws.send(JSON.stringify({action: 'kill'}));
       }
-      alert('Kill switch sent (backend may process it).');
+      alert('Kill switch sent.');
     }
 
     function startReplayDemo() {
-      // Trigger a BAR publish by calling the health or a small hack — 
-      // Since we have no direct API, simulate some events client side + rely on backend replay
       if (ws && ws.readyState === 1) {
         ws.send(JSON.stringify({action: 'replay'}));
       }
-      // Client-side demo data
       const symbols = ['NQ','ES','CL'];
       let i = 0;
       const iv = setInterval(() => {
@@ -419,7 +277,6 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
 
     function init() {
       initCharts();
-      // Initial agent placeholders
       const container = document.getElementById('agent-grid');
       const names = ['Overseer','DataOps','AccountSync','MarketPulse','IndicatorEngine','RegimeMonitor','StrategyRunner','ValidationEngine','ResearchLab','RiskCommand','DecisionEngine','ExecutionGateway','TradeJournal','PerformanceAnalyst','ReportPublisher'];
       names.forEach(n => {
@@ -429,14 +286,12 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
         container.appendChild(div);
       });
 
-      // Seed some demo data
       document.getElementById('equity-value').textContent = '12480.50';
       equityData = {x: [new Date(Date.now()-120000)], y: [12480.5]};
       Plotly.react('equity-chart', [{x: equityData.x, y: equityData.y, type:'scatter', mode:'lines', line:{color:'#4ade80'}}]);
 
       connectWS();
 
-      // Also poll health for agent list as fallback
       setInterval(async () => {
         try {
           const r = await fetch('/health');
@@ -449,6 +304,4 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
     window.onload = init;
   </script>
 </body>
-</html>'''
-
-print("Dashboard server loaded (inline HTML + WS)")
+</html>
