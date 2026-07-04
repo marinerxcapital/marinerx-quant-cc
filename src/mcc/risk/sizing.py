@@ -1,6 +1,5 @@
 """Risk sizing (Kelly/vol target, capped)."""
 from decimal import Decimal
-from typing import Tuple
 
 def kelly_size(equity: Decimal, win_prob: Decimal, payoff: Decimal, cap: Decimal = Decimal('0.5')) -> Decimal:
     if payoff <= 0:

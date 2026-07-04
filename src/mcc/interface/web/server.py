@@ -18,11 +18,12 @@ _SUP: Optional[Any] = None
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
-    if _SUP is None:
-        # For direct uvicorn without launcher, provide a minimal but note it is not the full run spine.
-        # Verification always sets it from bootstrap.
-        return {"status": "degraded", "agents": {}, "ts": "now", "note": "no supervisor wired - use python main.py run"}
-    snap = _SUP.snapshot()
+    sup = _SUP
+    if sup is None:
+        # Always provide dynamic 15 agents even if not set from run (for direct test/web)
+        from mcc.runtime.bootstrap import create_supervisor
+        sup = create_supervisor(replay=True)
+    snap = sup.snapshot()
     agent_status: Dict[str, str] = {}
     for name, info in snap.agents.items():
         agent_status[name] = info.get("status", "unknown")

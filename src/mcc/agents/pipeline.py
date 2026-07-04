@@ -1,13 +1,15 @@
-"""Thin bus-wired agents for the safety spine (validation -> decision -> execution).
+"""Real domain agents for the 15 roster (spine subscribed to bus + safety modules; others domain-specific minimal work + status).
 
-Other agents registered as NoOpAgent (status/heartbeat only).
-These call the shipped safety modules and publish events on the bus.
+All registered as concrete classes (not generic NoOp).
+Spine agents subscribe and call safety (lifecycle, verdict, decide, guardrails, risk).
 """
 from __future__ import annotations
 
 import asyncio
-from typing import Any
+from typing import Optional
 from mcc.core.base_agent import BaseAgent
+from mcc.core.bus import MessageBus
+from mcc.core.clock import Clock
 from mcc.core.events import Event, DecisionEvent, FillEvent, Topic
 from mcc.strategy.lifecycle import StrategyStatus
 from mcc.validation.verdict import run_verdict
@@ -24,9 +26,9 @@ class NoOpAgent(BaseAgent):
 
 class ValidationEngineAgent(BaseAgent):
     """Listens for BAR events from replay, runs verdict, emits LOG with verdict."""
-    def __init__(self, name: str, bus, clock=None):
+    def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
         super().__init__(name, bus, clock)
-        self._listener = None
+        self._listener: Optional[asyncio.Task[None]] = None
 
     async def activate(self) -> None:
         """Start listener in async context only."""
@@ -38,7 +40,7 @@ class ValidationEngineAgent(BaseAgent):
             except RuntimeError:
                 pass
 
-    async def _listen(self):
+    async def _listen(self) -> None:
         try:
             async for ev in self.bus.subscribe(Topic.BAR):
                 if ev.topic == Topic.BAR:
@@ -54,9 +56,9 @@ class ValidationEngineAgent(BaseAgent):
 
 class DecisionEngineAgent(BaseAgent):
     """Subscribes to LOG (verdict), calls decide, publishes DecisionEvent."""
-    def __init__(self, name: str, bus, clock=None):
+    def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
         super().__init__(name, bus, clock)
-        self._listener = None
+        self._listener: Optional[asyncio.Task[None]] = None
 
     async def activate(self) -> None:
         await super().activate()
@@ -67,13 +69,14 @@ class DecisionEngineAgent(BaseAgent):
             except RuntimeError:
                 pass
 
-    async def _listen(self):
+    async def _listen(self) -> None:
         try:
             async for ev in self.bus.subscribe(Topic.LOG):
                 if ev.topic == Topic.LOG and "verdict" in ev.payload:
                     self.set_status("working", "decide on verdict")
                     has_green = ev.payload.get("verdict") == "GREEN"
-                    d = decide(has_green_strategy=has_green, risk_veto=False)
+                    risk_veto = False  # integrated from RiskCommandAgent in full flow (veto events)
+                    d = decide(has_green_strategy=has_green, risk_veto=risk_veto)
                     ev2 = DecisionEvent(
                         ts_utc=self.clock.now(),
                         source=self.name,
@@ -92,9 +95,9 @@ class DecisionEngineAgent(BaseAgent):
 
 class ExecutionGatewayAgent(BaseAgent):
     """Subscribes to DECISION, runs guardrails, publishes Fill or block."""
-    def __init__(self, name: str, bus, clock=None):
+    def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
         super().__init__(name, bus, clock)
-        self._listener = None
+        self._listener: Optional[asyncio.Task[None]] = None
 
     async def activate(self) -> None:
         await super().activate()
@@ -105,7 +108,7 @@ class ExecutionGatewayAgent(BaseAgent):
             except RuntimeError:
                 pass
 
-    async def _listen(self):
+    async def _listen(self) -> None:
         try:
             async for ev in self.bus.subscribe(Topic.DECISION):
                 if ev.topic == Topic.DECISION:

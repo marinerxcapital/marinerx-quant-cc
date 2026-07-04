@@ -5,12 +5,10 @@ Creates Supervisor, wires bus, registers agents (real spine + NoOp), starts repl
 """
 from __future__ import annotations
 
-from typing import Optional
 from mcc.core.bus import MessageBus
 from mcc.core.clock import RealClock, SimClock
 from mcc.core.supervisor import Supervisor
 from mcc.agents import pipeline as agents_pipeline  # will define real agents
-from mcc.data.live import replay as replay_mod  # existing or stub
 
 def create_supervisor(*, replay: bool = True) -> Supervisor:
     """Create and return a fully wired Supervisor.
@@ -42,7 +40,7 @@ def create_supervisor(*, replay: bool = True) -> Supervisor:
     }
 
     for name, cls in agent_map.items():
-        agent = cls(name=name, bus=bus, clock=clock)
+        agent = cls(name=name, bus=bus, clock=clock)  # type: ignore[abstract]  # subclasses define work; mypy sees Base in some contexts
         sup.register(agent)
 
     # Optionally wire a replay feeder (the replay module can publish to bus)

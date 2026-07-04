@@ -14,7 +14,7 @@ import pandas as pd
 
 from mcc.core.bus import MessageBus
 from mcc.core.clock import SimClock, Clock
-from mcc.core.events import BarEvent, Topic
+from mcc.core.events import BarEvent
 
 
 class ReplayAdapter:
@@ -87,18 +87,12 @@ class ReplayAdapter:
                 sim.set(ts)
             # advance sim clock proportionally (for 60x, sleep is 1/60)
             ev = BarEvent(
-                topic=Topic.BARS,
                 ts_utc=ts,
                 source="replay",
-                payload={
-                    "symbol": row.get("symbol", "NQ"),
-                    "o": float(row.get("o", row.get("c", 0))),
-                    "h": float(row.get("h", row.get("c", 0))),
-                    "l": float(row.get("l", row.get("c", 0))),
-                    "c": float(row.get("c", 0)),
-                    "v": int(row.get("v", 0)),
-                },
+                symbol=row.get("symbol", "NQ"),
             )
+            # attach extra bar fields into payload post-construct (frozen dataclass)
+            object.__setattr__(ev, 'payload', {**ev.payload, "o": float(row.get("o", row.get("c", 0))), "h": float(row.get("h", row.get("c", 0))), "l": float(row.get("l", row.get("c", 0))), "c": float(row.get("c", 0)), "v": int(row.get("v", 0))})
             await self.bus.publish(ev)
             yield ev
 

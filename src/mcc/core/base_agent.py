@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, Optional
 from .bus import MessageBus
 from .clock import RealClock, Clock
-from .events import Event, LogEvent, Topic
+from .events import Event, Topic
 
 
 class BaseAgent(ABC):

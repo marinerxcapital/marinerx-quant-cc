@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional
 
 import typer
 from rich.console import Console
@@ -19,8 +19,9 @@ from rich.table import Table
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from mcc.runtime.bootstrap import create_supervisor
-from mcc.storage.relational import init_db
+from mcc.runtime.bootstrap import create_supervisor  # noqa: E402
+from mcc.storage.relational import init_db  # noqa: E402
+from mcc.core.supervisor import Supervisor  # noqa: E402
 
 try:
     from mcc.interface.web import server as web_server
@@ -64,19 +65,19 @@ def doctor() -> None:
 
     # Safety gate smoke (import the modules that should enforce)
     try:
-        from mcc.strategy.lifecycle import StrategyStatus  # type: ignore[import]
+        from mcc.strategy.lifecycle import StrategyStatus  # type: ignore[import]  # noqa: F401
         t.add_row("strategy lifecycle (P1)", "OK")
     except Exception:
         t.add_row("strategy lifecycle (P1)", "PARTIAL")
 
     try:
-        from mcc.execution.guardrails import check_pre_trade  # type: ignore[import]
+        from mcc.execution.guardrails import check_pre_trade  # type: ignore[import]  # noqa: F401
         t.add_row("execution guardrails (P1/P2)", "OK")
     except Exception:
         t.add_row("execution guardrails (P1/P2)", "PARTIAL")
 
     try:
-        from mcc.decision.engine import decide
+        from mcc.decision.engine import decide  # noqa: F401
         t.add_row("decision vetoes", "OK")
     except Exception:
         t.add_row("decision vetoes", "PARTIAL")
