@@ -451,4 +451,4 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
 </body>
 </html>'''
 
-print("Dashboard server loaded (inline HTML + WS)")
+# Dashboard server ready (inline + static/index.html + /ws)
