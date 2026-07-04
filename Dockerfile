@@ -2,7 +2,7 @@
 FROM python:3.11-slim AS builder
 WORKDIR /app
 COPY pyproject.toml .
-RUN pip install --no-cache-dir -e ".[dev]" || pip install --no-cache-dir .
+RUN pip install --no-cache-dir .
 COPY . .
 # Verify key runtime dep (typer from pyproject)
 RUN python -c "import typer, fastapi, uvicorn; print('deps ok')"
