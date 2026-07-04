@@ -15,14 +15,5 @@ ENV PYTHONPATH=/app/src:/app/.venv/lib/python3.11/site-packages
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PORT=8080
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s CMD python -c "
-import urllib.request, os, sys
-p = os.environ.get('PORT', '8080')
-try:
-    r = urllib.request.urlopen(f'http://127.0.0.1:{p}/health', timeout=5)
-    print(r.read().decode()[:200])
-except Exception as e: 
-    print('health fail', e)
-    sys.exit(1)
-" || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s CMD python -c "import urllib.request,os,sys;p=os.environ.get('PORT','8080');try:r=urllib.request.urlopen('http://127.0.0.1:'+p+'/health',timeout=5);print('ok') except Exception as e:print('fail',e);sys.exit(1)" || exit 1
 CMD ["python", "main.py", "run", "--interface", "web"]
