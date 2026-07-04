@@ -48,11 +48,7 @@ def health() -> Dict[str, Any]:
 
 @app.get("/")
 async def root() -> HTMLResponse:
-    """Serve the real dashboard (self-contained)."""
-    html_path = STATIC_DIR / "index.html"
-    if html_path.exists():
-        return FileResponse(html_path)
-    # Fallback: inline full dashboard (no external static files needed)
+    """Always serve the full interactive dashboard (self-contained HTML + WS)."""
     return HTMLResponse(content=_DASHBOARD_HTML, status_code=200)
 
 
@@ -163,6 +159,7 @@ _DASHBOARD_HTML = r'''<!DOCTYPE html>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
+        <div class="inline-block bg-emerald-500 text-black text-xs font-bold px-2 py-0.5 rounded mb-1">DASHBOARD v2 — LIVE</div>
         <h1 class="text-4xl font-semibold tracking-tight">MarinerX Quant Command Center</h1>
         <p class="text-slate-400 text-sm mt-1">Live • Replay Mode • 15 Agents • Paper Execution</p>
       </div>
