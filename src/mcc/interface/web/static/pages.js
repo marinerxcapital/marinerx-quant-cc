@@ -114,9 +114,10 @@ PAGES.indicators = function() {
   rg += '</div>';
   return '<div class="page-header"><h1 class="page-title">Indicators &amp; Regime</h1><p class="page-subtitle">Charting and regime classification.</p></div>' +
     '<div class="grid-2" style="grid-template-columns:280px 1fr;align-items:start"><div>' + lib + '</div>' +
-    '<div class="card"><div class="tabs"><button class="tab active">NQ</button><button class="tab">ES</button><button class="tab">CL</button><button class="tab">GC</button></div>' +
-    '<p class="mono" style="font-size:11px;margin-bottom:8px">NQ • 5m &nbsp; 18,742.75 &nbsp; O 18,752.75 H 18,716.25 L 18,742.75 C (+0.08%)</p>' +
-    '<div id="chart-nq-candlestick" style="height:360px"></div></div></div>' +
+    '<div class="card"><div class="tabs" id="indicator-symbol-tabs"><button class="tab active" data-tv-symbol="NQ">NQ</button><button class="tab" data-tv-symbol="ES">ES</button><button class="tab" data-tv-symbol="CL">CL</button><button class="tab" data-tv-symbol="GC">GC</button></div>' +
+    '<p class="mono" id="indicator-price-caption" style="font-size:11px;margin-bottom:8px">NQ • 5m • loading live quote…</p>' +
+    '<div id="tv-chart-indicators"></div>' +
+    '<div id="chart-nq-candlestick" style="height:0;overflow:hidden"></div></div></div>' +
     '<div class="card-title" style="margin-top:16px">Regime Snapshot</div>' + rg;
 };
 
@@ -218,7 +219,7 @@ PAGES.research = function() {
 };
 
 PAGES.risk = function() {
-  var top = '<div class="grid-3" style="margin-bottom:16px"><div class="card"><div class="card-title">Position Sizing</div>' +
+  var top = '<div class="grid-3" id="risk-metrics-live" style="margin-bottom:16px"><div class="card"><div class="card-title">Position Sizing</div>' +
     '<p><strong>Instrument:</strong> NQ</p><p style="font-size:20px;font-weight:800;margin:8px 0">2 contracts</p>' +
     '<div class="tabs"><button class="tab active">Fractional Kelly</button><button class="tab">Vol-Target</button></div>' +
     '<ul class="kv-list"><li><span class="kv-key">Risk per Trade</span><span class="kv-val">$350</span></li>' +
@@ -228,7 +229,7 @@ PAGES.risk = function() {
     '<p class="mono" style="text-align:center"><strong>$1,180</strong> / $2,500 limit</p></div>' +
     '<div class="card"><div class="card-title">Expected Shortfall (CVaR)</div><div id="chart-cvar-gauge" style="height:120px"></div>' +
     '<p class="mono" style="text-align:center"><strong>$1,740</strong> / $3,500 limit</p></div></div>';
-  var pg = '<div class="card" style="margin-bottom:16px"><div style="display:flex;gap:8px;align-items:center;margin-bottom:12px"><strong style="font-size:16px">PropGuardian</strong>' +
+  var pg = '<div class="card" id="risk-propguardian-live" style="margin-bottom:16px"><div style="display:flex;gap:8px;align-items:center;margin-bottom:12px"><strong style="font-size:16px">PropGuardian</strong>' +
     mxBadge('green','OK') + mxBadge('amber','CAUTION') + mxBadge('red','LOCKOUT') + '</div>' +
     '<div style="margin-bottom:12px"><div style="font-size:11px;margin-bottom:4px">Drawdown Headroom</div><div class="progress-bar"><div class="progress-fill green" style="width:87%"></div></div>' +
     '<span class="mono positive">Remaining Headroom $4,620</span></div>' +
@@ -237,7 +238,9 @@ PAGES.risk = function() {
   var exp = '<div class="card table-wrap"><div class="card-title">Portfolio Exposure</div><table class="data-table"><thead><tr><th>Instrument</th><th>Net Exposure</th><th>Gross Exposure</th><th>Contracts</th></tr></thead><tbody>' +
     '<tr><td>NQ</td><td class="positive">+2</td><td>2</td><td>2</td></tr><tr><td>ES</td><td class="negative">-1</td><td>1</td><td>1</td></tr>' +
     '<tr><td>CL</td><td class="positive">+1</td><td>1</td><td>1</td></tr><tr><td>GC</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div>';
-  return '<div class="page-header"><h1 class="page-title">Risk Command</h1><p class="page-subtitle">Sizing, VaR, expected shortfall, drawdown control, and portfolio exposure.</p></div>' + top + pg + exp;
+  return '<div class="page-header"><h1 class="page-title">Risk Command</h1><p class="page-subtitle">Sizing, VaR, expected shortfall, drawdown control, and portfolio exposure.</p></div>' +
+    '<div class="card" style="margin-bottom:16px"><div class="card-title">Live Market Context (TradingView)</div><div id="tv-chart-risk" style="height:320px"></div></div>' +
+    top + pg + '<div id="risk-exposure-live">' + exp + '</div>';
 };
 
 PAGES.decision = function() {
@@ -247,7 +250,7 @@ PAGES.decision = function() {
     ['CL','WTI CRUDE OIL','NO-GO','22%','77.35','Supply pressure elevated, momentum down.','no-go','red',''],
     ['GC','GOLD COMEX','STAND-ASIDE','49%','2,358.40','Range-bound market, low edge environment.','stand-aside','amber','']
   ];
-  var ic = '<div class="grid-4" style="margin-bottom:16px">';
+  var ic = '<div class="grid-4" id="decision-cards-live" style="margin-bottom:16px">';
   cards.forEach(function(c) {
     ic += '<div class="instrument-card ' + c[6] + (c[8]==='selected'?' selected':'') + '"><div class="instrument-symbol">' + c[0] +
       '</div><div class="instrument-name">' + c[1] + '</div>' + mxBadge('lg badge-' + c[7], c[2]) +
@@ -269,7 +272,10 @@ PAGES.decision = function() {
     '<div class="grid-2"><div><div class="card-title">Veto Checklist</div>' + vl + '</div><div><div class="card-title">Factor Breakdown</div>' + fb + '</div></div>' +
     '<div style="margin-top:16px;padding:12px;background:var(--mx-bg);border-radius:8px;font-size:12px"><strong>Reasoning:</strong> NQ is approved because validated setup alignment is present, regime indicator confirms trending state, internals remain risk-on, and PropGuardian headroom remains above required threshold.</div>' +
     '<div class="grid-3" style="margin-top:12px;font-size:12px"><div><strong>Recommended Size:</strong> 2 contracts</div><div><strong>Max Risk:</strong> $350</div><div><strong>Invalidation:</strong> break below opening range midpoint</div></div></div>';
-  return '<div class="page-header"><h1 class="page-title">Trade-or-No-Trade Decision Center</h1><p class="page-subtitle">Real-time trade eligibility and decision analytics.</p></div>' + ic + detail;
+  return '<div class="page-header"><h1 class="page-title">Trade-or-No-Trade Decision Center</h1><p class="page-subtitle">Real-time trade eligibility and decision analytics.</p></div>' +
+    ic +
+    '<div class="card" style="margin-bottom:16px"><div class="card-title">Interactive Chart — <span id="decision-tv-symbol">NQ</span> (TradingView)</div><div id="tv-chart-decision"></div></div>' +
+    '<div id="decision-detail-live">' + detail + '</div>';
 };
 
 PAGES.execution = function() {
@@ -343,8 +349,9 @@ PAGES.performance = function() {
     '<tr><td>NO-GO</td><td>104</td><td>—</td><td class="positive">+$2,820</td><td>—</td><td>—</td><td>—</td></tr>' +
     '<tr><td>STAND-ASIDE</td><td>63</td><td>—</td><td>$0</td><td>—</td><td>—</td><td>—</td></tr>' +
     '<tr><td><strong>TOTAL</strong></td><td>248</td><td>—</td><td class="positive"><strong>+$9,060</strong></td><td>0.29</td><td>1.42</td><td class="negative">-$2,180</td></tr></tbody></table>';
-  return '<div class="page-header"><h1 class="page-title">Performance Analytics</h1></div>' +
-    '<div class="grid-2" style="margin-bottom:16px"><div class="card"><div class="card-title">Equity Curve &amp; Drawdown</div>' + stats +
+  return '<div class="page-header"><h1 class="page-title">Performance Analytics</h1><p class="page-subtitle">Paper-simulated performance from live NQ returns (yfinance).</p></div>' +
+    '<div class="card" style="margin-bottom:16px"><div class="card-title">Benchmark — NQ Futures (TradingView)</div><div id="tv-chart-performance"></div></div>' +
+    '<div class="grid-2" style="margin-bottom:16px"><div class="card"><div class="card-title">Equity Curve &amp; Drawdown</div><div id="perf-stats-live">' + stats + '</div>' +
     '<div id="chart-equity-dd" style="height:280px"></div></div>' +
     '<div><div class="card" style="margin-bottom:16px"><div class="card-title">Rolling Sharpe Ratio</div><div class="mono">0.64</div><div id="chart-sharpe" style="height:100px"></div></div>' +
     '<div class="card"><div class="card-title">Rolling Sortino Ratio</div><div class="mono">0.98</div><div id="chart-sortino" style="height:100px"></div></div></div></div>' +

@@ -102,3 +102,85 @@ def test_live_sources_endpoint(client):
     r = client.get("/api/live/sources")
     assert r.status_code == 200
     assert "yfinance" in r.json()["primary"]
+
+
+def test_live_decision_endpoint(client, monkeypatch):
+    class FakeTicker:
+        def history(self, **kwargs):
+            return _fake_df()
+
+    class FakeYF:
+        def Ticker(self, symbol):
+            return FakeTicker()
+
+    monkeypatch.setattr(free_market, "_get_yf", lambda: FakeYF())
+    r = client.get("/api/live/decision")
+    assert r.status_code == 200
+    body = r.json()
+    assert "cards" in body
+    assert len(body["cards"]) == 4
+    assert body["primary_symbol"] in {"NQ", "ES", "CL", "GC"}
+    assert "confidence_pct" in body["cards"][0]
+    assert "vetoes" in body["cards"][0]
+
+
+def test_live_risk_endpoint(client, monkeypatch):
+    class FakeTicker:
+        def history(self, **kwargs):
+            return _fake_df()
+
+    class FakeYF:
+        def Ticker(self, symbol):
+            return FakeTicker()
+
+    monkeypatch.setattr(free_market, "_get_yf", lambda: FakeYF())
+    r = client.get("/api/live/risk")
+    assert r.status_code == 200
+    body = r.json()
+    assert "prop_guardian" in body
+    assert "var" in body
+    assert "cvar" in body
+    assert "exposures" in body
+    assert len(body["exposures"]) == 4
+
+
+def test_live_performance_endpoint(client, monkeypatch):
+    idx = pd.date_range("2026-01-01", periods=30, freq="1D", tz=timezone.utc)
+
+    def make_df():
+        return pd.DataFrame(
+            {
+                "Open": [100.0 + i for i in range(30)],
+                "High": [101.0 + i for i in range(30)],
+                "Low": [99.0 + i for i in range(30)],
+                "Close": [100.5 + i * 0.5 for i in range(30)],
+                "Volume": [1000] * 30,
+            },
+            index=idx,
+        )
+
+    class FakeTicker:
+        def history(self, **kwargs):
+            return make_df()
+
+    class FakeYF:
+        def Ticker(self, symbol):
+            return FakeTicker()
+
+    monkeypatch.setattr(free_market, "_get_yf", lambda: FakeYF())
+    r = client.get("/api/live/performance")
+    assert r.status_code == 200
+    body = r.json()
+    assert "equity_curve" in body
+    assert len(body["equity_curve"]) > 0
+    assert "sharpe" in body
+    assert "disclaimer" in body
+
+
+def test_live_tradingview_endpoint(client):
+    r = client.get("/api/live/tradingview")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["default_symbol"] == "NQ"
+    assert "NQ" in body["symbols"]
+    assert body["symbols"]["NQ"] == "CME_MINI:NQ1!"

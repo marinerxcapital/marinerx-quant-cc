@@ -1312,3 +1312,34 @@ html, body {
 
 .positive { color: var(--mx-green-text); }
 .negative { color: var(--mx-red-text); }
+
+/* ── TradingView embed panels ── */
+.tv-chart-panel {
+  width: 100%;
+  min-height: 280px;
+  border: 1px solid var(--mx-border);
+  border-radius: var(--mx-radius);
+  overflow: hidden;
+  background: var(--mx-surface);
+  position: relative;
+}
+
+.tv-chart-panel .tradingview-widget-container {
+  min-height: inherit;
+}
+
+.tv-attribution {
+  font-size: 10px;
+  color: var(--mx-muted);
+  text-align: right;
+  padding: 4px 8px 0;
+}
+
+.tv-attribution a {
+  color: var(--mx-blue);
+  text-decoration: none;
+}
+
+.tv-attribution a:hover {
+  text-decoration: underline;
+}

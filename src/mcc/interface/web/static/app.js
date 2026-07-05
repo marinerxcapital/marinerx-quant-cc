@@ -108,6 +108,7 @@
   function navigate(page) {
     if (!window.PAGES || !window.PAGES[page]) page = 'home';
     currentPage = page;
+    if (window.TradingViewMX) window.TradingViewMX.reset();
     var container = document.getElementById('page-content');
     if (container) container.innerHTML = window.PAGES[page]();
     document.querySelectorAll('.sidebar-nav a').forEach(function (a) {
