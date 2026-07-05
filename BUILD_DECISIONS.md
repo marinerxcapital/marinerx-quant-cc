@@ -1,5 +1,15 @@
 # BUILD DECISIONS LEDGER
 
+## Phase 16 — Riskfolio + QuantStats + statsmodels (2026-07-04)
+
+- **Scope:** Refactor RegimeMonitor, RiskCommand, PerformanceAnalyst only. New `analytics/` boundary package.
+- **Decimal boundary:** All `Decimal`→`float` for library calls routes through `analytics/conversion.py`. No bare `float(decimal_field)` in modified modules.
+- **Riskfolio integration:** New `risk/riskfolio_adapter.py`; existing `kelly_size`/`historical_var_es` signatures preserved. Fractional Kelly cap wraps adapter raw output.
+- **QuantStats benchmark:** Flat risk-free rate (`flat_rate_4.5pct`), not equity index — futures-only book.
+- **Regime engine:** `hmmlearn.GaussianHMM` replaced by `statsmodels.MarkovRegression`. `RegimeEvent` shape unchanged; behavioral differences documented in `reports_out/diagnostics/regime_old_vs_new_comparison.json`.
+- **RegimeEvent:** Added to `core/events.py` with `{type, symbol, state, confidence}` — no breaking change to consumers (new event type on LOG topic).
+- **Dependencies:** `riskfolio-lib`, `quantstats`, `statsmodels`, `scipy` added to `pyproject.toml`.
+
 ## Phase 15 — UI Fidelity Match (2026-07-04)
 
 - **Scope:** Frontend-only pass per `command-center/15_UI_MATCH_AND_RAILWAY_DEPLOY.md`. No backend/agent/risk/validation logic changes.

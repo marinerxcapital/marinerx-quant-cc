@@ -1,0 +1,43 @@
+{
+  "run_id": "cc668dc5-f6ed-4705-892c-f271909f083b",
+  "account_id": "PHASE16-EVIDENCE",
+  "timestamp_utc": "2026-07-05T05:47:38.486366+00:00",
+  "instruments": [
+    "NQ",
+    "ES",
+    "CL",
+    "GC"
+  ],
+  "method": "risk_parity",
+  "risk_measure": "CVaR",
+  "constraints": {
+    "max_position_cap": {
+      "NQ": 3.0,
+      "ES": 3.0,
+      "CL": 2.0,
+      "GC": 2.0
+    },
+    "weight_upper_bounds": {
+      "NQ": 0.3,
+      "ES": 0.3,
+      "CL": 0.2,
+      "GC": 0.2
+    }
+  },
+  "weights": {
+    "NQ": 0.32596092,
+    "ES": 0.23942451,
+    "CL": 0.21730728,
+    "GC": 0.21730728
+  },
+  "expected_return": 0.00014141,
+  "expected_volatility": 0.00388834,
+  "sharpe_ratio": -11.53668057,
+  "risk_contributions": {
+    "NQ": 1.7085474,
+    "ES": -0.20506893,
+    "CL": -0.2886488,
+    "GC": -0.21482967
+  },
+  "warnings": []
+}

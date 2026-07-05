@@ -1,0 +1,45 @@
+{
+  "metrics": {
+    "strategy_id_or_account_id": "PHASE16-EVIDENCE",
+    "benchmark": "flat_rate_4.5pct",
+    "start_date": "2024-06-03",
+    "end_date": "2024-06-08",
+    "total_return": 0.00409422,
+    "annualized_return": 0.18721004,
+    "annualized_volatility": 0.0358696,
+    "max_drawdown": -0.002,
+    "sharpe": 4.79585341,
+    "sortino": 11.37604353,
+    "calmar": 93.60502129,
+    "report_path": "reports_out\\tear_sheets\\PHASE16-EVIDENCE_2026-07-04.html"
+  },
+  "attribution": {
+    "go_count": 5,
+    "go_profitable_count": 3,
+    "go_unprofitable_count": 2,
+    "go_hit_rate": 0.6,
+    "go_total_pnl": 410.0,
+    "go_avg_pnl": 82.0,
+    "no_go_avoided_loss": 0.0,
+    "no_go_missed_gain": 0.0,
+    "net_attribution_edge": 410.0,
+    "by_setup": {
+      "unknown": {
+        "count": 5.0,
+        "total_pnl": 410.0,
+        "avg_pnl": 82.0,
+        "hit_rate": 0.6
+      }
+    },
+    "by_regime": {
+      "unknown": {
+        "count": 5.0,
+        "total_pnl": 410.0,
+        "avg_pnl": 82.0,
+        "hit_rate": 0.6
+      }
+    }
+  },
+  "tearsheet_path": "reports_out\\tear_sheets\\PHASE16-EVIDENCE_2026-07-04.html",
+  "metrics_json_path": "reports_out\\tear_sheets\\PHASE16-EVIDENCE_2024-06-08_metrics.json"
+}

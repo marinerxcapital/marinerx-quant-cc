@@ -1,0 +1,14 @@
+{
+  "strategy_id_or_account_id": "PHASE16-EVIDENCE",
+  "benchmark": "flat_rate_4.5pct",
+  "start_date": "2024-06-03",
+  "end_date": "2024-06-08",
+  "total_return": 0.00409422,
+  "annualized_return": 0.18721004,
+  "annualized_volatility": 0.0358696,
+  "max_drawdown": -0.002,
+  "sharpe": 4.79585341,
+  "sortino": 11.37604353,
+  "calmar": 93.60502129,
+  "report_path": "reports_out\\tear_sheets\\PHASE16-EVIDENCE_2026-07-04.html"
+}

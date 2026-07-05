@@ -1,0 +1,35 @@
+{
+  "fixture": {
+    "symbol": "NQ_FIXTURE",
+    "n_obs": 240,
+    "source": "synthetic",
+    "seed": 42
+  },
+  "statsmodels": {
+    "engine": "MarkovRegression",
+    "state": "mean-reverting",
+    "confidence": 0.9954663721321154,
+    "regime_probabilities": {
+      "mean-reverting": 0.9954663721321154,
+      "trending": 0.004533627867884354
+    },
+    "diagnostics": {
+      "n_obs": 239,
+      "n_regimes": 2,
+      "aic": -2834.200080011717,
+      "bic": -2813.341298700128,
+      "regime_variances": {
+        "mean-reverting": 1.601490803988399e-07,
+        "trending": 8.857280482766665e-07
+      },
+      "last_timestamp": "2024-01-02 13:29:00+00:00"
+    }
+  },
+  "hmmlearn": {
+    "available": false,
+    "error": "hmmlearn not installed: No module named 'hmmlearn'"
+  },
+  "states_agree": null,
+  "confidence_delta": null,
+  "note": "Behavioral differences between engines are expected; RegimeEvent shape (state + confidence) is preserved."
+}

@@ -22,6 +22,10 @@ dependencies = [
     "apscheduler",
     "tenacity",
     "pyyaml",
+    "riskfolio-lib>=6.0",
+    "quantstats>=0.0.62",
+    "statsmodels>=0.14",
+    "scipy>=1.11",
 ]
 
 [project.optional-dependencies]

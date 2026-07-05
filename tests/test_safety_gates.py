@@ -48,9 +48,9 @@ from mcc.strategy.lifecycle import StrategyStatus, transition
 
 def test_risk_sizing_functions():
     eq = Decimal("100000")
-    s1 = kelly_size(eq, Decimal("0.6"), Decimal("1.5"))
+    s1, _ = kelly_size(eq, Decimal("0.6"), Decimal("1.5"))
     assert s1 > 0
-    s2 = vol_target_size(eq, Decimal("0.02"), Decimal("0.01"))
+    s2, _ = vol_target_size(eq, Decimal("0.02"), Decimal("0.01"))
     assert s2 >= 1
 
 def test_risk_guardian_levels():
