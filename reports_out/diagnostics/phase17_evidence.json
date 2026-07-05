@@ -1,0 +1,112 @@
+{
+  "isolation_forest": {
+    "model_id": "iforest-16125f0cfb47",
+    "model_type": "isolation_forest",
+    "verdict": "SIGNAL",
+    "metric": 1.0,
+    "baseline_metric": 0.6,
+    "diagnostics": {
+      "n_obs": 200,
+      "n_flagged": 10,
+      "z_threshold": 3.0,
+      "contamination": 0.05,
+      "if_recall_on_confirmed": 1.0,
+      "zscore_baseline_recall": 0.6,
+      "adapted_discipline": "anomaly_recall_vs_zscore_baseline"
+    },
+    "warnings": []
+  },
+  "pca": {
+    "model_id": "pca-b06a7ae98d5f",
+    "model_type": "pca",
+    "n_components": 2,
+    "explained_variance_ratio": {
+      "PC1": 0.7129213318482177,
+      "PC2": 0.27126479925510116
+    },
+    "cumulative_explained_variance": {
+      "PC1": 0.7129213318482177,
+      "PC2": 0.9841861311033189
+    },
+    "diagnostics": {
+      "input_columns": [
+        "mkt",
+        "rates",
+        "vol"
+      ],
+      "total_variance_explained": 0.9841861311033189,
+      "vif_remedy_note": "Consider PCA orthogonalization (forecast_lab.run_pca_factors)"
+    }
+  },
+  "random_forest": {
+    "model_id": "rf-af0e9f0c3bf0",
+    "model_type": "random_forest",
+    "verdict": "SIGNAL",
+    "metric": 0.015300631513188513,
+    "baseline_metric": 0.2684501510871272,
+    "diagnostics": {
+      "n_train": 140,
+      "n_test": 60,
+      "n_estimators": 100,
+      "p3_gate": "mse_vs_naive_persistence",
+      "beats_baseline": true
+    },
+    "warnings": []
+  },
+  "ols_rigor": {
+    "model_id": "ols-c63df3d5be88",
+    "model_type": "OLS",
+    "dependent_variable": "NQ_fixture",
+    "independent_variables": [
+      "market_proxy",
+      "rates_proxy"
+    ],
+    "coefficients": {
+      "const": -0.00019864727402192528,
+      "market_proxy": 0.6105965414425847,
+      "rates_proxy": 0.059847532690583655
+    },
+    "p_values": {
+      "const": 0.0027203381607603565,
+      "market_proxy": 9.890944162991019e-39,
+      "rates_proxy": 0.65582412653484
+    },
+    "r_squared": 0.5800649211112298,
+    "adjusted_r_squared": 0.5757798692858342,
+    "diagnostics": {
+      "n_obs": 199,
+      "joint_f_statistic": 135.36940619327882,
+      "joint_f_pvalue": 1.1799161487191162e-37,
+      "joint_f_significant": true,
+      "joint_f_alpha": 0.05,
+      "vif": {
+        "market_proxy": 1.0006469684129997,
+        "rates_proxy": 1.0006469684129997
+      },
+      "vif_threshold": 5.0,
+      "vif_flagged": [],
+      "coefficient_significance": {
+        "market_proxy": {
+          "coefficient": 0.6105965414425847,
+          "p_value": 9.890944162991019e-39,
+          "statistically_significant": true,
+          "economically_significant": true,
+          "predicted_effect_abs": 0.6105965414425847,
+          "round_trip_cost": 0.00015
+        },
+        "rates_proxy": {
+          "coefficient": 0.059847532690583655,
+          "p_value": 0.65582412653484,
+          "statistically_significant": false,
+          "economically_significant": true,
+          "predicted_effect_abs": 0.059847532690583655,
+          "round_trip_cost": 0.00015
+        }
+      },
+      "instrument": "NQ",
+      "aic": -2216.35321246898,
+      "bic": -2206.4732979948067
+    },
+    "warnings": []
+  }
+}

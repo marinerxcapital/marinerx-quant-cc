@@ -1,5 +1,13 @@
 # BUILD DECISIONS LEDGER
 
+## Phase 17 — Forecast Extension + Statistical Rigor (2026-07-04)
+
+- **Scope:** ResearchLab (`forecast_lab.py` new) + `stat_models.py` OLS rigor + `reports/generator.py` styling. Five bounded items only.
+- **forecast_lab.py:** Created (did not exist pre-Phase 17). Isolation Forest uses adapted recall-vs-z-score discipline; PCA always discloses explained variance; Random Forest uses standard P3 MSE gate.
+- **stat_models.py:** Phase 16 OLS extended additively with VIF (threshold 5), joint F-test, independent statistical/economic significance flags via `backtest/costs.py`.
+- **Excluded:** RL, CNN/Transformer, genetic algorithms per work order Section 1.
+- **Dependencies:** Only `seaborn` and `openpyxl` added as new; `scikit-learn` pinned (was in master brief but missing from pyproject.toml).
+
 ## Phase 16 — Riskfolio + QuantStats + statsmodels (2026-07-04)
 
 - **Scope:** Refactor RegimeMonitor, RiskCommand, PerformanceAnalyst only. New `analytics/` boundary package.
