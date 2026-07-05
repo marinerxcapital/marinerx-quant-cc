@@ -48,7 +48,10 @@ def health() -> Dict[str, Any]:
 
 @app.get("/")
 async def root() -> HTMLResponse:
-    """Always serve the full interactive dashboard (self-contained HTML + WS)."""
+    """Serve Phase 15 MarinerX Labs SPA from static/index.html."""
+    index_path = STATIC_DIR / "index.html"
+    if index_path.exists():
+        return HTMLResponse(content=index_path.read_text(encoding="utf-8"), status_code=200)
     return HTMLResponse(content=_DASHBOARD_HTML, status_code=200)
 
 

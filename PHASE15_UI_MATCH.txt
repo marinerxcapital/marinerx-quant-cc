@@ -1,0 +1,27 @@
+PHASE 15 — UI FIDELITY MATCH — GATE PASS
+Date: 2026-07-04
+Project: MarinerX_SuperGrok_Build/MASTER_PACKAGE
+
+ACCEPTANCE CHECKLIST:
+[x] design-tokens.css created with mockup color/spacing tokens
+[x] 13 pages implemented: home, market-pulse, indicators, strategy, validation, research, risk, decision, execution, journal, performance, reports, settings
+[x] Packaged logo (marinerx_labs_logo.jpeg) and X icon (marinerx_labs_x_icon.png) integrated
+[x] Shared chrome: sidebar, header metrics, KILL SWITCH, UTC clock
+[x] pytest: 11 passed
+[x] doctor: All green, 15 agents
+[x] No backend logic files modified (interface/web/ only + static assets + mockups reference)
+[x] Committed and pushed to GitHub master
+[x] Railway redeploy triggered
+
+Files changed:
+- src/mcc/interface/web/server.py (serve static/index.html at root)
+- src/mcc/interface/web/static/design-tokens.css (new)
+- src/mcc/interface/web/static/app.css (new)
+- src/mcc/interface/web/static/index.html (replaced)
+- src/mcc/interface/web/static/pages.js (new)
+- src/mcc/interface/web/static/app.js (new)
+- src/mcc/interface/web/static/marinerx_labs_logo.jpeg (new)
+- src/mcc/interface/web/static/marinerx_labs_x_icon.png (new)
+- mockups/ (reference PNGs copied)
+- command-center/15_UI_MATCH_AND_RAILWAY_DEPLOY.md (new)
+- scripts/gen_pages_js.py (generator utility)
