@@ -97,7 +97,9 @@ Any veto → `{"decision": "NO_GO", "vetoes": [...]}`
 - `get_risk_level()` → `LOCKOUT` at 5% drawdown threshold
 - Sizing functions enforce caps via `kelly_size` / `vol_target_size`
 
-Integrated into decision path via `risk_veto` flag (pipeline uses `False` in minimal replay flow; full bus integration pending).
+**Resolved (CRITICAL PATCH 01, 2026-07-05):** `RiskCommandAgent` publishes veto state on the bus via `RiskMonitor`. `DecisionEngineAgent` and `ExecutionGatewayAgent` subscribe to `RiskCommand` LOG events and pass the live `risk_veto` value into `decide()` and `check_pre_trade()`.
+
+**Integration test:** `tests/integration/test_pipeline_risk_veto.py` — proves LOCKOUT forces `NO_GO` through the actual pipeline and that `ExecutionGatewayAgent` blocks injected GO decisions when veto is active.
 
 ---
 

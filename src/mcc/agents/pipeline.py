@@ -16,6 +16,16 @@ from mcc.validation.verdict import run_verdict
 from mcc.decision.engine import decide
 from mcc.execution.guardrails import check_pre_trade
 from mcc.core.exceptions import ExecutionBlocked, RiskVeto
+from mcc.risk.monitor import RiskMonitor
+
+
+def _parse_risk_veto_from_payload(payload: dict) -> bool | None:
+    """Return veto flag when payload is a RiskCommand risk-state publication."""
+    if payload.get("type") == "risk_veto":
+        return bool(payload.get("veto"))
+    if "risk_state" in payload:
+        return bool(payload.get("veto", payload["risk_state"].get("veto")))
+    return None
 
 class NoOpAgent(BaseAgent):
     """Placeholder for roster agents not in the safety spine."""
@@ -59,6 +69,8 @@ class DecisionEngineAgent(BaseAgent):
     def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
         super().__init__(name, bus, clock)
         self._listener: Optional[asyncio.Task[None]] = None
+        self._risk_listener: Optional[asyncio.Task[None]] = None
+        self._risk_veto = False
 
     async def activate(self) -> None:
         await super().activate()
@@ -66,8 +78,20 @@ class DecisionEngineAgent(BaseAgent):
             try:
                 loop = asyncio.get_running_loop()
                 self._listener = loop.create_task(self._listen())
+                self._risk_listener = loop.create_task(self._listen_risk())
             except RuntimeError:
                 pass
+
+    async def _listen_risk(self) -> None:
+        try:
+            async for ev in self.bus.subscribe(Topic.LOG):
+                if ev.topic != Topic.LOG or ev.source != "RiskCommand":
+                    continue
+                veto = _parse_risk_veto_from_payload(ev.payload)
+                if veto is not None:
+                    self._risk_veto = veto
+        except asyncio.CancelledError:
+            pass
 
     async def _listen(self) -> None:
         try:
@@ -75,8 +99,7 @@ class DecisionEngineAgent(BaseAgent):
                 if ev.topic == Topic.LOG and "verdict" in ev.payload:
                     self.set_status("working", "decide on verdict")
                     has_green = ev.payload.get("verdict") == "GREEN"
-                    risk_veto = False  # integrated from RiskCommandAgent in full flow (veto events)
-                    d = decide(has_green_strategy=has_green, risk_veto=risk_veto)
+                    d = decide(has_green_strategy=has_green, risk_veto=self._risk_veto)
                     ev2 = DecisionEvent(
                         ts_utc=self.clock.now(),
                         source=self.name,
@@ -98,6 +121,8 @@ class ExecutionGatewayAgent(BaseAgent):
     def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
         super().__init__(name, bus, clock)
         self._listener: Optional[asyncio.Task[None]] = None
+        self._risk_listener: Optional[asyncio.Task[None]] = None
+        self._risk_veto = False
 
     async def activate(self) -> None:
         await super().activate()
@@ -105,8 +130,20 @@ class ExecutionGatewayAgent(BaseAgent):
             try:
                 loop = asyncio.get_running_loop()
                 self._listener = loop.create_task(self._listen())
+                self._risk_listener = loop.create_task(self._listen_risk())
             except RuntimeError:
                 pass
+
+    async def _listen_risk(self) -> None:
+        try:
+            async for ev in self.bus.subscribe(Topic.LOG):
+                if ev.topic != Topic.LOG or ev.source != "RiskCommand":
+                    continue
+                veto = _parse_risk_veto_from_payload(ev.payload)
+                if veto is not None:
+                    self._risk_veto = veto
+        except asyncio.CancelledError:
+            pass
 
     async def _listen(self) -> None:
         try:
@@ -116,7 +153,7 @@ class ExecutionGatewayAgent(BaseAgent):
                     is_go = ev.payload.get("decision") == "GO"
                     try:
                         if is_go:
-                            check_pre_trade(StrategyStatus.GREEN, risk_veto=False, size_ok=True)
+                            check_pre_trade(StrategyStatus.GREEN, risk_veto=self._risk_veto, size_ok=True)
                             f = FillEvent(
                                 ts_utc=self.clock.now(),
                                 source=self.name,
@@ -161,8 +198,19 @@ class ResearchLabAgent(BaseAgent):
         await asyncio.sleep(0.1)
 
 class RiskCommandAgent(BaseAgent):
+    """Publishes consolidated risk state (including veto) on the bus for spine agents."""
+    def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
+        super().__init__(name, bus, clock)
+        self._monitor: Optional[RiskMonitor] = None
+
+    async def activate(self) -> None:
+        await super().activate()
+        if self._monitor is None:
+            self._monitor = RiskMonitor(self.bus, self.clock)
+            await self._monitor.start()
+
     async def work(self) -> None:
-        self.set_status("working", "risk")
+        self.set_status("working", "risk monitor")
         await asyncio.sleep(0.1)
 
 class TradeJournalAgent(BaseAgent):
