@@ -1,0 +1,15 @@
+analytics:
+  risk_free_rate_annual: 0.045
+  default_risk_measure: CVaR
+  regime_model: MarkovRegression
+  benchmark_label: flat_rate_4.5pct
+  instruments: [NQ, ES, CL, GC]
+  max_position_cap:
+    NQ: 3
+    ES: 3
+    CL: 2
+    GC: 2
+  reports_out:
+    tear_sheets: reports_out/tear_sheets
+    allocations: reports_out/allocations
+    diagnostics: reports_out/diagnostics

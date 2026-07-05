@@ -43,3 +43,11 @@ class FeedError(MCCError):
 
 class IntegrityError(MCCError):
     pass
+
+
+class AnalyticsValidationError(MCCError):
+    pass
+
+
+class AnalyticsConversionError(MCCError):
+    pass
