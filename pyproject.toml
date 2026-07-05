@@ -26,6 +26,9 @@ dependencies = [
     "quantstats>=0.0.62",
     "statsmodels>=0.14",
     "scipy>=1.11",
+    "scikit-learn>=1.4",
+    "seaborn>=0.13",
+    "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]
