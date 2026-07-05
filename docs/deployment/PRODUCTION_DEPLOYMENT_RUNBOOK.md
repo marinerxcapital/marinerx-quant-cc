@@ -67,12 +67,12 @@ See `R2_STORAGE.md`.
 1. Render Dashboard → **New** → **Blueprint**
 2. Connect repo; select `render.yaml`
 3. Review services:
-   - `marinerx-labs-api` (web)
-   - `marinerx-labs-worker` (worker)
+   - `marinerx-labs-api` (web, free tier smoke)
+   - `marinerx-labs-worker` is deferred until paid-worker approval; Render free tier does not support background workers.
 
 ### Option B — Manual
 
-Mirror `render.yaml` settings: Docker runtime, free plan for dev/smoke, health path `/health`, commands as documented in `RENDER_WEB_SERVICE.md` and `RENDER_WORKER.md`. Upgrade to `starter` for production traffic.
+Mirror `render.yaml` settings: Docker runtime, free web plan for dev/smoke, health path `/health`, command as documented in `RENDER_WEB_SERVICE.md`. Add the worker from `RENDER_WORKER.md` later on `starter` or another approved paid tier.
 
 ---
 

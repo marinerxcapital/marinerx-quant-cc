@@ -1,6 +1,6 @@
 # Deployment Setup Status — 2026-07-05
 
-Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2).
+Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2). Current Render Blueprint is a **free web-service smoke deploy**; background worker is deferred because Render does not offer free background workers.
 
 ---
 
@@ -40,7 +40,7 @@ Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2).
 | Docker build smoke test | **BLOCKED** | Docker Desktop not installed (`docker` not in PATH). Install Docker Desktop, then run commands in § Docker below. |
 | Cloudflare R2 | **BLOCKED** | R2 not enabled on account (error `10042`; rechecked 2026-07-05 with `wrangler r2 bucket list`). **You must click Enable R2** in dashboard — see `RENDER_R2_COMBINED_SETUP.md` Part A. |
 | Neon Postgres | **DONE** | Project `MarinerX Labs` (`summer-star-19798293`), branch `production`. Postgres verified. |
-| Render deploy | **IN PROGRESS** | `render.yaml` on **free tier** ($0/mo web + worker). Apply Blueprint in dashboard. Recheck 2026-07-05: `https://marinerx-labs-api.onrender.com/health` returns Render `404 Not Found` / `x-render-routing: no-server`, so service is not live yet. |
+| Render deploy | **IN PROGRESS** | `render.yaml` on **free web tier** ($0/mo web smoke). Worker intentionally deferred until paid-worker approval. Apply Blueprint in dashboard. Recheck 2026-07-05: `https://marinerx-labs-api.onrender.com/health` returns Render `404 Not Found` / `x-render-routing: no-server`, so service is not live yet. |
 
 ---
 
@@ -93,8 +93,8 @@ npx neonctl@latest env pull --file .env
 2. **New → Blueprint**
 3. Connect GitHub → `marinerxcapital/marinerx-quant-cc` → branch `master`
 4. Render reads `render.yaml` → creates:
-   - `marinerx-labs-api` (web)
-   - `marinerx-labs-worker` (worker)
+   - `marinerx-labs-api` (web, free tier)
+   - Worker is deferred; Render free tier does not support background workers.
 5. When prompted, set secret env vars:
    - `DATABASE_URL` (from Neon)
    - `R2_*` (from Cloudflare)

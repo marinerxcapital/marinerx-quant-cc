@@ -1,10 +1,20 @@
 # Render Blueprint — MarinerX Quant Command Center
 # Deploy: Dashboard -> New -> Blueprint -> connect marinerxcapital/marinerx-quant-cc
-# Secrets: set in dashboard when prompted (sync: false) or via envVarGroups below.
-# Plan: free ($0/mo) — 512 MB RAM, spins down when idle. Upgrade to starter ($7/mo) for prod traffic.
+# Secrets: set in dashboard when prompted (sync: false).
+# Plan: free ($0/mo) web smoke — 512 MB RAM, spins down when idle.
+# Note: Render free tier is not available for background workers. Add the worker
+# on starter/prod tier later after explicit cost approval.
 
-envVarGroups:
-  - name: marinerx-production-secrets
+services:
+  - type: web
+    name: marinerx-labs-api
+    runtime: docker
+    plan: free
+    region: virginia
+    repo: https://github.com/marinerxcapital/marinerx-quant-cc
+    branch: master
+    healthCheckPath: /health
+    autoDeployTrigger: commit
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -18,20 +28,6 @@ envVarGroups:
         sync: false
       - key: R2_PUBLIC_BASE_URL
         sync: false
-
-services:
-  - type: web
-    name: marinerx-labs-api
-    runtime: docker
-    plan: free
-    region: virginia
-    repo: https://github.com/marinerxcapital/marinerx-quant-cc
-    branch: master
-    healthCheckPath: /health
-    autoDeployTrigger: commit
-    envVarGroups:
-      - name: marinerx-production-secrets
-    envVars:
       - key: APP_ENV
         value: production
       - key: SERVICE_MODE
@@ -57,34 +53,3 @@ services:
       - key: BACKEND_PUBLIC_URL
         sync: false
     dockerCommand: python main.py run --interface web
-
-  - type: worker
-    name: marinerx-labs-worker
-    runtime: docker
-    plan: free
-    region: virginia
-    repo: https://github.com/marinerxcapital/marinerx-quant-cc
-    branch: master
-    autoDeployTrigger: commit
-    envVarGroups:
-      - name: marinerx-production-secrets
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: SERVICE_MODE
-        value: worker
-      - key: ENABLE_LIVE_EXECUTION
-        value: "false"
-      - key: OBJECT_STORAGE_BACKEND
-        value: r2
-      - key: DATA_DIR
-        value: /data
-      - key: LOG_DIR
-        value: /data/logs
-      - key: PARQUET_DIR
-        value: /data/parquet
-      - key: REPORTS_DIR
-        value: /data/reports
-      - key: LOCAL_OBJECT_STORAGE_DIR
-        value: /data/objects
-    dockerCommand: python main.py run --interface worker

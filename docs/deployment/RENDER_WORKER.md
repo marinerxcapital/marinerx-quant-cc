@@ -2,6 +2,8 @@
 
 The agent supervisor runs as a **Docker background worker** on Render — no HTTP server, persistent heartbeat loop.
 
+**Current deployment status:** deferred. Render's free tier is not available for background workers, so the active `render.yaml` provisions only the free web service for smoke testing. Add this worker later on a paid plan after explicit cost approval.
+
 ## Service definition
 
 | Item | Value |
@@ -10,7 +12,7 @@ The agent supervisor runs as a **Docker background worker** on Render — no HTT
 | Service name | `marinerx-labs-worker` |
 | Type | `worker` |
 | Runtime | `docker` |
-| Plan | `free` |
+| Plan | `starter` or approved production tier |
 | Start command | `python main.py run --interface worker` |
 
 ## What the worker does
@@ -118,4 +120,4 @@ sqlite3 ./data/mcc.sqlite "SELECT * FROM agent_heartbeats ORDER BY id DESC LIMIT
 - `ENABLE_LIVE_EXECUTION=false` in `render.yaml` for worker.
 - Tradeify browser automation blocked in cloud (see `TRADEIFY_LOCAL_ONLY_POLICY.md`).
 - Worker uses replay supervisor — no live execution keys required.
-- Free tier is suitable for dev/smoke and may spin down after idle; upgrade to `starter` for production traffic.
+- Render free tier is not available for background workers.

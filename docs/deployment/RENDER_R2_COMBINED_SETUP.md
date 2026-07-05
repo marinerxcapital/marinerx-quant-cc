@@ -1,6 +1,6 @@
 # Render + R2 Combined Setup (Do Both)
 
-One checklist for production object storage (Cloudflare R2) and compute (Render web + worker).
+One checklist for production object storage (Cloudflare R2) and the Render free web-service smoke deploy. The background worker is deferred because Render free tier does not support workers.
 
 **Prerequisites:** Neon Postgres done (`.env` has `DATABASE_URL`), GitHub at `master` with `render.yaml`.
 
@@ -54,7 +54,7 @@ pip install -e ".[deploy]"
 
 ---
 
-## Part B — Render Blueprint (web + worker)
+## Part B — Render Blueprint (free web smoke)
 
 ### B1. Launch Blueprint
 
@@ -63,8 +63,7 @@ pip install -e ".[deploy]"
 3. Branch: `master`
 4. Render loads `render.yaml` → preview:
    - `marinerx-labs-api` (web, Docker, `/health`)
-   - `marinerx-labs-worker` (background worker)
-   - Env group: `marinerx-production-secrets`
+   - Worker is deferred until explicit paid-worker approval.
 
 ### B2. Set secrets (prompted during Blueprint apply)
 
@@ -87,11 +86,11 @@ Render will ask for values marked `sync: false`. Use:
 - `APP_ENV=production`
 - `ENABLE_LIVE_EXECUTION=false`
 - `OBJECT_STORAGE_BACKEND=r2`
-- `SERVICE_MODE=web` or `worker`
+- `SERVICE_MODE=web`
 
 ### B3. Apply Blueprint and wait for deploy
 
-Both services build from `Dockerfile`. First build may take 5–10 minutes.
+The web service builds from `Dockerfile`. First build may take 5–10 minutes.
 
 ### B4. Smoke test
 
@@ -112,7 +111,7 @@ Expected JSON:
 }
 ```
 
-Worker: check Render logs for `worker_started` and `worker_heartbeat`.
+Worker: deferred. Add later from `RENDER_WORKER.md` on a paid Render plan after explicit approval.
 
 ---
 
