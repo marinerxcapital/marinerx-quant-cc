@@ -37,4 +37,3 @@ _phase*_package/
 # Local runtime data and worktrees
 data/
 wt/
-.neon
