@@ -8,10 +8,10 @@
   "statsmodels": {
     "engine": "MarkovRegression",
     "state": "mean-reverting",
-    "confidence": 0.9954663719503677,
+    "confidence": 0.9954663722604461,
     "regime_probabilities": {
-      "trending": 0.004533628049632551,
-      "mean-reverting": 0.9954663719503677
+      "mean-reverting": 0.9954663722604461,
+      "trending": 0.0045336277395543086
     },
     "diagnostics": {
       "n_obs": 239,
@@ -19,8 +19,8 @@
       "aic": -2834.2000800117166,
       "bic": -2813.3412987001275,
       "regime_variances": {
-        "trending": 8.857280483088194e-07,
-        "mean-reverting": 1.6014907977064588e-07
+        "mean-reverting": 1.6014907942247948e-07,
+        "trending": 8.857280530944948e-07
       },
       "last_timestamp": "2024-01-02 13:29:00+00:00"
     }
