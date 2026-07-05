@@ -10,7 +10,7 @@ The MarinerX API and dashboard run as a **Docker web service** on Render.
 | Service name | `marinerx-labs-api` |
 | Type | `web` |
 | Runtime | `docker` |
-| Plan | `starter` |
+| Plan | `free` |
 | Health check path | `/health` |
 | Start command | `python main.py run --interface web` |
 
@@ -122,3 +122,4 @@ curl -s http://localhost:8080/health
 - Web service runs replay adapter by default — no live market keys required.
 - Do **not** enable Tradeify browser automation on Render (see `TRADEIFY_LOCAL_ONLY_POLICY.md`).
 - Railway remains fallback until DNS cutover (see `RAILWAY_FALLBACK_PLAN.md`).
+- Free tier is suitable for dev/smoke and may spin down after idle; upgrade to `starter` for production traffic.

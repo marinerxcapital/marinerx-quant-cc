@@ -8,10 +8,11 @@ Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2).
 
 | Step | Status | Evidence |
 |------|--------|----------|
-| Code migration committed | **DONE** | `a280475` — `deploy: migrate infrastructure to cloudflare render postgres r2` |
-| Pushed to GitHub | **DONE** | `master` → `origin/master` (`469115a..a280475`) |
+| Code migration committed | **DONE** | Infra migration through `a280475`; Render free-tier + Codex handoff through `a93383b` |
+| Pushed to GitHub | **DONE** | `master` → `origin/master` through `a93383b` before this tracker sync |
 | Local pytest | **DONE** | `73 passed` (includes CRITICAL PATCH 01 integration tests) |
 | Local doctor | **DONE** | All green, live execution DISABLED |
+| Codex startup verification | **DONE** | 2026-07-05: `python main.py doctor` all green; `python -m pytest tests/ -q` → `73 passed, 28 warnings` |
 | Local web smoke test | **DONE** | `/health` → `status: ok`, `live_execution_enabled: false`, 15 agents |
 | Wrangler auth (Cloudflare) | **DONE** | Account: MarinerX Capital (`b31d3d49151af98fe1125aa40c5fa6c8`) |
 

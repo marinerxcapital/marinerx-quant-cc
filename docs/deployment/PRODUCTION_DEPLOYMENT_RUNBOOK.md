@@ -26,7 +26,7 @@ End-to-end procedure for deploying MarinerX Quant Command Center to **Render + m
 - [ ] Read `EXECUTION_SAFETY_AUDIT.md` — confirm no live execution
 - [ ] Read `TRADEIFY_LOCAL_ONLY_POLICY.md` — no cloud browser automation
 - [ ] Local verification complete per `DEPLOYMENT_VERIFICATION.md`
-- [ ] `pytest tests/` green (70+ tests)
+- [ ] `pytest tests/` green (73 tests as of CRITICAL PATCH 01)
 - [ ] `python main.py doctor` green
 - [ ] Docker image builds locally
 - [ ] Secrets available (never commit): `DATABASE_URL`, `R2_*`, domain URLs
@@ -72,7 +72,7 @@ See `R2_STORAGE.md`.
 
 ### Option B — Manual
 
-Mirror `render.yaml` settings: Docker runtime, starter plan, health path `/health`, commands as documented in `RENDER_WEB_SERVICE.md` and `RENDER_WORKER.md`.
+Mirror `render.yaml` settings: Docker runtime, free plan for dev/smoke, health path `/health`, commands as documented in `RENDER_WEB_SERVICE.md` and `RENDER_WORKER.md`. Upgrade to `starter` for production traffic.
 
 ---
 

@@ -30,6 +30,13 @@ python -m pytest tests/ -q
 70 passed, 25 warnings in 91.15s
 ```
 
+**Codex startup evidence (2026-07-05, after CRITICAL PATCH 01):**
+
+```
+python -m pytest tests/ -q
+73 passed, 28 warnings in 98.90s
+```
+
 Deployment-specific subset:
 
 ```bash
