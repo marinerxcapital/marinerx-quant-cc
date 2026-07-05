@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for Railway (Phase 14)
+# Multi-stage Dockerfile — Render Web/Worker + Railway fallback
 FROM python:3.11-slim AS builder
 WORKDIR /app
 RUN python -m venv /opt/venv

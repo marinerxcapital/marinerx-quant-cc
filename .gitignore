@@ -29,3 +29,7 @@ Thumbs.db
 
 # Local work-order extracts (archived under MarinerX_Labs/03_PACKAGES_AND_ARCHIVES)
 _phase*_package/
+
+# Local runtime data and worktrees
+data/
+wt/

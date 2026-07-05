@@ -51,3 +51,8 @@ class AnalyticsValidationError(MCCError):
 
 class AnalyticsConversionError(MCCError):
     pass
+
+
+class CloudTradeifyAutomationBlockedError(MCCError):
+    """Raised when Tradeify browser automation is attempted in cloud/production."""
+    pass

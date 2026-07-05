@@ -13,10 +13,30 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from mcc.core.config import MCCSettings, get_settings
+from mcc.storage.database import check_database_connectivity
+from mcc.storage.object_store import get_object_store
+
 app = FastAPI(title="MarinerX Quant Command Center")
+_RUNTIME_SETTINGS: MCCSettings | None = None
+
+_default_settings = get_settings()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_default_settings.cors_origin_list(),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+def configure_runtime(settings: MCCSettings | None = None) -> None:
+    global _RUNTIME_SETTINGS
+    _RUNTIME_SETTINGS = settings or get_settings()
 
 # MUST be set by launcher (main.py run) using bootstrap.create_supervisor()
 _SUP: Optional[Any] = None
@@ -32,6 +52,7 @@ if STATIC_DIR.exists():
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
+    settings = _RUNTIME_SETTINGS or get_settings()
     sup = _SUP
     if sup is None:
         from mcc.runtime.bootstrap import create_supervisor
@@ -40,10 +61,31 @@ def health() -> Dict[str, Any]:
     agent_status: Dict[str, str] = {}
     for name, info in snap.agents.items():
         agent_status[name] = info.get("status", "unknown")
-    status = "ok" if all(s != "error" for s in agent_status.values()) else "degraded"
+    agent_health = "ok" if all(s != "error" for s in agent_status.values()) else "degraded"
+
+    db_health = check_database_connectivity()
+    storage_health: Dict[str, Any]
+    try:
+        storage_health = get_object_store(settings).health()
+    except Exception as exc:
+        storage_health = {"status": "error", "error": str(exc)}
+
+    components = [agent_health, db_health.get("status", "error"), storage_health.get("status", "error")]
+    overall = "ok" if all(c == "ok" for c in components) else ("degraded" if "error" not in components else "error")
+
     ts_val = getattr(snap, "ts_utc", None)
     ts_str = ts_val.isoformat() if ts_val else "now"
-    return {"status": status, "agents": agent_status, "ts": ts_str}
+    return {
+        "status": overall,
+        "app_env": settings.app_env,
+        "service_mode": settings.service_mode,
+        "version": settings.app_version,
+        "live_execution_enabled": settings.enable_live_execution,
+        "database": db_health,
+        "object_storage": storage_health,
+        "agents": agent_status,
+        "ts": ts_str,
+    }
 
 
 @app.get("/")

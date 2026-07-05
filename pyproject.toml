@@ -33,6 +33,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "ruff", "mypy"]
+deploy = ["boto3>=1.34"]
 
 [project.scripts]
 mcc = "main:cli"
