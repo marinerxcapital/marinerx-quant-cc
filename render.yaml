@@ -1,12 +1,35 @@
 # Render Blueprint — MarinerX Quant Command Center
-# Secrets must be set in Render dashboard (not committed here).
+# Deploy: Dashboard -> New -> Blueprint -> connect marinerxcapital/marinerx-quant-cc
+# Secrets: set in dashboard when prompted (sync: false) or via envVarGroups below.
+
+envVarGroups:
+  - name: marinerx-production-secrets
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
 
 services:
   - type: web
     name: marinerx-labs-api
     runtime: docker
     plan: starter
+    region: virginia
+    repo: https://github.com/marinerxcapital/marinerx-quant-cc
+    branch: master
     healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVarGroups:
+      - name: marinerx-production-secrets
     envVars:
       - key: APP_ENV
         value: production
@@ -26,18 +49,6 @@ services:
         value: /data/reports
       - key: LOCAL_OBJECT_STORAGE_DIR
         value: /data/objects
-      - key: DATABASE_URL
-        sync: false
-      - key: R2_ACCOUNT_ID
-        sync: false
-      - key: R2_ACCESS_KEY_ID
-        sync: false
-      - key: R2_SECRET_ACCESS_KEY
-        sync: false
-      - key: R2_BUCKET_NAME
-        sync: false
-      - key: R2_PUBLIC_BASE_URL
-        sync: false
       - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: PUBLIC_FRONTEND_URL
@@ -50,6 +61,12 @@ services:
     name: marinerx-labs-worker
     runtime: docker
     plan: starter
+    region: virginia
+    repo: https://github.com/marinerxcapital/marinerx-quant-cc
+    branch: master
+    autoDeployTrigger: commit
+    envVarGroups:
+      - name: marinerx-production-secrets
     envVars:
       - key: APP_ENV
         value: production
@@ -63,14 +80,10 @@ services:
         value: /data
       - key: LOG_DIR
         value: /data/logs
-      - key: DATABASE_URL
-        sync: false
-      - key: R2_ACCOUNT_ID
-        sync: false
-      - key: R2_ACCESS_KEY_ID
-        sync: false
-      - key: R2_SECRET_ACCESS_KEY
-        sync: false
-      - key: R2_BUCKET_NAME
-        sync: false
+      - key: PARQUET_DIR
+        value: /data/parquet
+      - key: REPORTS_DIR
+        value: /data/reports
+      - key: LOCAL_OBJECT_STORAGE_DIR
+        value: /data/objects
     dockerCommand: python main.py run --interface worker

@@ -37,9 +37,9 @@ Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2).
 | Step | Status | Action required |
 |------|--------|-----------------|
 | Docker build smoke test | **BLOCKED** | Docker Desktop not installed (`docker` not in PATH). Install Docker Desktop, then run commands in § Docker below. |
-| Cloudflare R2 | **BLOCKED** | R2 not enabled on account. Error `10042`: enable at dashboard link below. |
-| Neon Postgres | **DONE** | Project `MarinerX Labs` (`summer-star-19798293`), branch `production`. `.neon` linked; `.env` has `DATABASE_URL` (gitignored). Postgres connectivity verified: `backend: postgres`, `status: ok`. |
-| Render deploy | **PENDING** | No `RENDER_API_KEY`. Connect GitHub repo via Render Blueprint (`render.yaml`). |
+| Cloudflare R2 | **BLOCKED** | R2 not enabled on account (error `10042`). **You must click Enable R2** in dashboard — see `RENDER_R2_COMBINED_SETUP.md` Part A. |
+| Neon Postgres | **DONE** | Project `MarinerX Labs` (`summer-star-19798293`), branch `production`. Postgres verified. |
+| Render deploy | **IN PROGRESS** | `render.yaml` updated with env group + `virginia` region. Apply Blueprint in dashboard (browser opened). |
 
 ---
 
