@@ -1,6 +1,7 @@
 # Render Blueprint — MarinerX Quant Command Center
 # Deploy: Dashboard -> New -> Blueprint -> connect marinerxcapital/marinerx-quant-cc
 # Secrets: set in dashboard when prompted (sync: false) or via envVarGroups below.
+# Plan: free ($0/mo) — 512 MB RAM, spins down when idle. Upgrade to starter ($7/mo) for prod traffic.
 
 envVarGroups:
   - name: marinerx-production-secrets
@@ -22,7 +23,7 @@ services:
   - type: web
     name: marinerx-labs-api
     runtime: docker
-    plan: starter
+    plan: free
     region: virginia
     repo: https://github.com/marinerxcapital/marinerx-quant-cc
     branch: master
@@ -60,7 +61,7 @@ services:
   - type: worker
     name: marinerx-labs-worker
     runtime: docker
-    plan: starter
+    plan: free
     region: virginia
     repo: https://github.com/marinerxcapital/marinerx-quant-cc
     branch: master
