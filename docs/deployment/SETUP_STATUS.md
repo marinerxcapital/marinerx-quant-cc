@@ -38,9 +38,9 @@ Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2).
 | Step | Status | Action required |
 |------|--------|-----------------|
 | Docker build smoke test | **BLOCKED** | Docker Desktop not installed (`docker` not in PATH). Install Docker Desktop, then run commands in § Docker below. |
-| Cloudflare R2 | **BLOCKED** | R2 not enabled on account (error `10042`). **You must click Enable R2** in dashboard — see `RENDER_R2_COMBINED_SETUP.md` Part A. |
+| Cloudflare R2 | **BLOCKED** | R2 not enabled on account (error `10042`; rechecked 2026-07-05 with `wrangler r2 bucket list`). **You must click Enable R2** in dashboard — see `RENDER_R2_COMBINED_SETUP.md` Part A. |
 | Neon Postgres | **DONE** | Project `MarinerX Labs` (`summer-star-19798293`), branch `production`. Postgres verified. |
-| Render deploy | **IN PROGRESS** | `render.yaml` on **free tier** ($0/mo web + worker). Apply Blueprint in dashboard. |
+| Render deploy | **IN PROGRESS** | `render.yaml` on **free tier** ($0/mo web + worker). Apply Blueprint in dashboard. Recheck 2026-07-05: `https://marinerx-labs-api.onrender.com/health` returns Render `404 Not Found` / `x-render-routing: no-server`, so service is not live yet. |
 
 ---
 
