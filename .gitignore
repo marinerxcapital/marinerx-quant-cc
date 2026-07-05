@@ -16,7 +16,11 @@ htmlcov/
 
 # Environment
 .env
+.env.local
 .venv/
+
+# Neon link is safe to commit; secrets stay in .env only
+# .neon is committed intentionally for project/branch context
 venv/
 
 # IDE
@@ -33,3 +37,4 @@ _phase*_package/
 # Local runtime data and worktrees
 data/
 wt/
+.neon

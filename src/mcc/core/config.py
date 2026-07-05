@@ -107,10 +107,17 @@ class MCCSettings(BaseSettings):
     def is_local(self) -> bool:
         return self.app_env.strip().lower() in ("local", "development", "dev")
 
+    @staticmethod
+    def normalize_database_url(url: str) -> str:
+        """Use psycopg v3 driver when URL is plain postgresql:// (Neon default)."""
+        if url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            return url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return url
+
     @property
     def sqlalchemy_url(self) -> str:
         if self.database_url:
-            return self.database_url
+            return self.normalize_database_url(self.database_url)
         if self.is_production and not self.database_url:
             raise ConfigError(
                 "DATABASE_URL is required when APP_ENV is production or staging",

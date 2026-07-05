@@ -38,7 +38,7 @@ Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2).
 |------|--------|-----------------|
 | Docker build smoke test | **BLOCKED** | Docker Desktop not installed (`docker` not in PATH). Install Docker Desktop, then run commands in § Docker below. |
 | Cloudflare R2 | **BLOCKED** | R2 not enabled on account. Error `10042`: enable at dashboard link below. |
-| Neon Postgres | **PENDING** | No `NEON_API_KEY` in environment. Create project at Neon console; copy `DATABASE_URL`. |
+| Neon Postgres | **DONE** | Project `MarinerX Labs` (`summer-star-19798293`), branch `production`. `.neon` linked; `.env` has `DATABASE_URL` (gitignored). Postgres connectivity verified: `backend: postgres`, `status: ok`. |
 | Render deploy | **PENDING** | No `RENDER_API_KEY`. Connect GitHub repo via Render Blueprint (`render.yaml`). |
 
 ---
@@ -64,17 +64,25 @@ wrangler r2 bucket create marinerx-mcc-prod
 
 ---
 
-## Step-by-step: Neon Postgres
+## Neon Postgres — configured
 
-1. Open: https://console.neon.tech/
-2. Sign in (GitHub OK)
-3. **New Project** → name `marinerx-mcc`, region nearest to Render (e.g. US East)
-4. Copy connection string (with `?sslmode=require`)
-5. Set on **both** Render services:
+| Item | Value |
+|------|-------|
+| Org | MarinerX Labs (`org-square-wave-40095229`) |
+| Project | MarinerX Labs (`summer-star-19798293`) |
+| Branch | `production` (`br-delicate-voice-aiyzlz6h`) |
+| Region | `aws-us-east-1` |
+| Local link | `.neon` in repo root |
+| Secrets | `.env` — `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` |
 
+**Refresh local env after branch changes:**
+
+```powershell
+npx neonctl@latest checkout production
+npx neonctl@latest env pull --file .env
 ```
-DATABASE_URL=postgresql://user:pass@ep-xxx.region.aws.neon.tech/mcc?sslmode=require
-```
+
+**Render:** copy `DATABASE_URL` from `.env` into **both** web and worker services (use pooled URL).
 
 ---
 
