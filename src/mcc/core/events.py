@@ -88,3 +88,24 @@ class TradeNewEvent(Event):
         if isinstance(p, dict):
             payload = p
         super().__init__(Topic.LOG, ts_utc, source, payload)
+
+
+@dataclass(frozen=True)
+class RegimeEvent(Event):
+    """Regime classification output — state label + confidence (Phase 16 contract preserved)."""
+
+    def __init__(
+        self,
+        ts_utc: datetime,
+        source: str,
+        symbol: str,
+        state: str,
+        confidence: float,
+        **kw: Any,
+    ):
+        super().__init__(
+            Topic.LOG,
+            ts_utc,
+            source,
+            {"type": "regime", "symbol": symbol, "state": state, "confidence": confidence, **kw},
+        )
