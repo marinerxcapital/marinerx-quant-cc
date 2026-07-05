@@ -5,7 +5,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY pyproject.toml .
 COPY src ./src
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir ".[deploy]"
 COPY . .
 RUN python -c "import typer, fastapi, uvicorn; print('deps ok in builder')"
 

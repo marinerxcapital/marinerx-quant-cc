@@ -110,13 +110,11 @@ Same as web for: `APP_ENV`, `SERVICE_MODE=worker`, `ENABLE_LIVE_EXECUTION`, `OBJ
 ## 6. Deploy sequence
 
 ```
-1. Deploy worker first (validates DB + R2 without user traffic)
-2. Confirm worker logs: worker_started, worker_heartbeat
-3. Query agent_heartbeats — rows appearing
-4. Deploy web service
-5. Wait for Render health check on /health
-6. Smoke test endpoints
-7. Optional DNS cutover
+1. Deploy web service from the current free-tier Blueprint.
+2. Wait for Render health check on /health.
+3. Smoke test endpoints.
+4. Optional DNS cutover.
+5. Add the worker later from `RENDER_WORKER.md` on an approved paid tier.
 ```
 
 **Do not** enable live execution at any step.

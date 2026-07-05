@@ -99,7 +99,7 @@ npx neonctl@latest env pull --file .env
    - `DATABASE_URL` (from Neon)
    - `R2_*` (from Cloudflare)
    - `CORS_ALLOWED_ORIGINS`, `PUBLIC_FRONTEND_URL`, `BACKEND_PUBLIC_URL`
-6. Deploy both services
+6. Deploy the web service
 
 Smoke after deploy:
 
