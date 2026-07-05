@@ -108,11 +108,28 @@ class MCCSettings(BaseSettings):
         return self.app_env.strip().lower() in ("local", "development", "dev")
 
     @staticmethod
+    def sanitize_database_url(url: str) -> str:
+        """Strip common copy-paste mistakes from Render/Neon dashboard pastes."""
+        cleaned = url.strip().strip('"').strip("'")
+        for prefix in ("DATABASE_URL=", "export DATABASE_URL=", "psql "):
+            if cleaned.upper().startswith(prefix.upper()):
+                cleaned = cleaned[len(prefix) :].strip().strip('"').strip("'")
+        return cleaned
+
+    @staticmethod
     def normalize_database_url(url: str) -> str:
         """Use psycopg v3 driver when URL is plain postgresql:// (Neon default)."""
+        url = MCCSettings.sanitize_database_url(url)
         if url.startswith("postgresql://") and not url.startswith("postgresql+"):
             return url.replace("postgresql://", "postgresql+psycopg://", 1)
         return url
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _sanitize_database_url_field(cls, value: object) -> object:
+        if isinstance(value, str):
+            return cls.sanitize_database_url(value)
+        return value
 
     @property
     def sqlalchemy_url(self) -> str:

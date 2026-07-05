@@ -40,3 +40,17 @@ def test_production_requires_database_url(monkeypatch):
     settings = MCCSettings(_env_file=None)
     with pytest.raises(Exception):
         _ = settings.sqlalchemy_url
+
+
+def test_sanitize_database_url_strips_common_paste_mistakes():
+    raw = 'DATABASE_URL="postgresql://user:pass@host-pooler.region.aws.neon.tech/db?sslmode=require"'
+    assert MCCSettings.sanitize_database_url(raw).startswith("postgresql://user:pass@")
+
+
+def test_sqlalchemy_url_accepts_neon_pooled_with_prefix(monkeypatch):
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "DATABASE_URL=postgresql://user:pass@host-pooler.region.aws.neon.tech/db?sslmode=require",
+    )
+    settings = MCCSettings(_env_file=None)
+    assert settings.sqlalchemy_url.startswith("postgresql+psycopg://user:pass@")
