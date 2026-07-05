@@ -40,7 +40,7 @@ Live tracker for Option 1 migration (Cloudflare + Render + Neon + R2). Current R
 | Docker build smoke test | **BLOCKED** | Docker Desktop not installed (`docker` not in PATH). Install Docker Desktop, then run commands in § Docker below. |
 | Cloudflare R2 | **DONE** | Bucket `marinerx-mcc-prod` exists (`wrangler r2 bucket list` 2026-07-05). Set `R2_ACCESS_KEY_ID` + `R2_SECRET_ACCESS_KEY` from API token in Render. |
 | Neon Postgres | **DONE** | Project `MarinerX Labs` (`summer-star-19798293`), branch `production`. Postgres verified. |
-| Render deploy | **IN PROGRESS** | Service `srv-d95d9m4vikkc73dk02kg` failing: malformed `DATABASE_URL` in Render env (`Could not parse SQLAlchemy URL`). Fix: paste pooled Neon URI only (no `DATABASE_URL=` prefix/quotes). Redeploy `bb1c368+`. Code fix: `sanitize_database_url` added for common paste mistakes. |
+| Render deploy | **DONE** | `https://marinerx-labs-api.onrender.com/health` → `status: ok`, Postgres + R2 ok, `live_execution_enabled: false`, 15 agents (2026-07-05 smoke PASS). |
 
 ---
 
