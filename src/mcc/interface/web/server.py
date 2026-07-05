@@ -18,10 +18,12 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from mcc.core.config import MCCSettings, get_settings
+from mcc.interface.web.live_routes import router as live_router
 from mcc.storage.database import check_database_connectivity
 from mcc.storage.object_store import get_object_store
 
 app = FastAPI(title="MarinerX Quant Command Center")
+app.include_router(live_router)
 _RUNTIME_SETTINGS: MCCSettings | None = None
 
 _default_settings = get_settings()

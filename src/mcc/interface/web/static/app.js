@@ -115,6 +115,7 @@
     });
     initCharts(page);
     if (page === 'home') pollHealth();
+    if (window.LiveData) window.LiveData.hydrate(page);
   }
 
   function updateClock() {
@@ -181,6 +182,7 @@
     setInterval(updateClock, 1000);
     connectWS();
     setInterval(pollHealth, 5000);
+    if (window.LiveData) window.LiveData.startPolling(function () { return currentPage; });
     var hash = (location.hash || '#home').slice(1);
     navigate(hash || 'home');
     window.addEventListener('hashchange', function () {
