@@ -35,10 +35,11 @@ def get_engine(url: str | None = None) -> Engine:
 
     _register_all_tables()
     eng = create_engine(db_url, connect_args=connect_args, **engine_kwargs)
-    Base.metadata.create_all(eng)
+    from mcc.storage.schema import ensure_schema
 
-    if url is None:
-        _engine = eng
+    ensure_schema(eng)
+
+    _engine = eng
     return eng
 
 
@@ -63,3 +64,6 @@ def reset_engine() -> None:
     if _engine is not None:
         _engine.dispose()
     _engine = None
+    from mcc.storage.session import reset_session_factory
+
+    reset_session_factory()

@@ -19,7 +19,12 @@ from fastapi.staticfiles import StaticFiles
 
 from mcc.core.config import MCCSettings, get_settings
 from mcc.interface.web.agent_routes import router as agent_router
+from mcc.interface.web.backtest_routes import router as backtest_router
+from mcc.interface.web.decision_routes import router as decision_router
 from mcc.interface.web.live_routes import router as live_router
+from mcc.interface.web.platform_routes import router as platform_router
+from mcc.interface.web.risk_routes import router as risk_router
+from mcc.interface.web.strategy_routes import router as strategy_router
 from mcc.interface.web.system_routes import router as system_router
 from marinerx_tradeify.router import router as tradeify_router
 from mcc.storage.database import check_database_connectivity
@@ -29,6 +34,11 @@ app = FastAPI(title="MarinerX Quant Command Center")
 app.include_router(live_router)
 app.include_router(agent_router)
 app.include_router(system_router)
+app.include_router(strategy_router)
+app.include_router(backtest_router)
+app.include_router(risk_router)
+app.include_router(decision_router)
+app.include_router(platform_router)
 app.include_router(tradeify_router)
 _RUNTIME_SETTINGS: MCCSettings | None = None
 

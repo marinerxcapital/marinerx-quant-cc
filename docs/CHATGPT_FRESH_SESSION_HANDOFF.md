@@ -416,7 +416,30 @@ The build is **not complete** until all of the following are true:
 14. Tests pass (doctor + pytest)
 15. Documentation package exists
 
-**Current completion estimate:** ~15–20% of full master prompt (foundation + Phase 2 truth layer + partial live/tradeify APIs).
+**Current completion estimate:** ~55–65% of full master prompt (Git reconciled, Tier 1 APIs + persistence + partial Tier 2).
+
+### SuperGrok Subagent Package Run (2026-07-07)
+
+| Phase | Status |
+|-------|--------|
+| Git reconciliation + merge 3b757e0 | ✅ `535a9d2` |
+| Phase 2 system-truth committed | ✅ |
+| Phase 3 persistence | ✅ models + repositories + schema migration |
+| Strategy Registry API | ✅ |
+| Backtest engine + API | ✅ |
+| Risk Command API | ✅ |
+| Trade-or-no-trade engine | ✅ |
+| Tier 1 frontend wiring | ✅ strategies/backtest/risk/decision JS |
+| Tier 2 stubs | ✅ data/validation/regime/orders/journal/performance/reports |
+| Tests | ✅ 148 passed, 1 pre-existing failure |
+
+**Phase 2 preservation:** commit `535a9d2` (rebased on `3b757e0`).
+
+**Verification (last run):**
+```
+python main.py doctor  → All green
+python -m pytest tests/ -q → 148 passed, 1 failed (e2e replay)
+```
 
 ---
 

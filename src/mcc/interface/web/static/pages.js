@@ -122,24 +122,7 @@ PAGES.indicators = function() {
 };
 
 PAGES.strategy = function() {
-  var rows = [
-    ['STR-NQ-ORB-001','NQ Opening Range Breakout','v1.8','NQ','RED','2025-05-30 13:54','StrategyRunner','Edge decayed after open.',''],
-    ['STR-CL-EIA-002','CL EIA Inventory Drift','v2.1','CL','YELLOW','2025-05-30 12:41','ResearchLab','Needs post-release validation.','selected'],
-    ['STR-ESNQ-SPR-003','ES/NQ Spread Reversion','v0.9','ES, NQ','DRAFT','2025-05-29 18:12','ResearchLab','Hypothesis stage only.',''],
-    ['STR-GC-VWAP-004','GC VWAP Mean Reversion','v3.0','GC','GREEN','2025-05-30 11:08','ValidationEngine','Stable under current regime.',''],
-    ['STR-NQ-MOMO-005','NQ Regime Momentum','v1.4','NQ','TESTED','2025-05-30 10:36','RegimeMonitor','Awaiting verdict memo.',''],
-    ['STR-CL-BRK-006','CL London Breakout','v2.7','CL','RED','2025-05-30 09:57','StrategyRunner','Drawdown breach.',''],
-    ['STR-ES-IB-007','ES Initial Balance Fade','v1.2','ES','YELLOW','2025-05-29 16:48','DecisionEngine','Mixed validation set.',''],
-    ['STR-GC-ADX-008','GC Trend Filter Stack','v1.0','GC','REGISTERED','2025-05-29 15:02','Overseer','Registered for first pass.',''],
-    ['STR-NQ-REV-009','NQ Overnight Reversal','v2.5','NQ','RED','2025-05-30 08:21','PerformanceAnalyst','Weak live consistency.','']
-  ];
-  var tbl = '<table class="data-table"><thead><tr><th>Strategy ID</th><th>Name</th><th>Version</th><th>Instrument(s)</th><th>Status</th><th>Last Updated</th><th>Owner/Agent</th><th>Notes</th></tr></thead><tbody id="strategy-registry-live">';
-  rows.forEach(function(r) {
-    var bc = r[4]==='GREEN'?'green':r[4]==='RED'?'red':r[4]==='YELLOW'?'amber':'neutral';
-    tbl += '<tr class="' + r[8] + '"><td class="mono">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] +
-      '</td><td>' + mxBadge(bc, r[4]) + '</td><td class="mono">' + r[5] + '</td><td>' + r[6] + '</td><td>' + r[7] + '</td></tr>';
-  });
-  tbl += '</tbody></table>';
+  var tbl = '<table class="data-table"><thead><tr><th>Strategy ID</th><th>Name</th><th>Version</th><th>Instrument(s)</th><th>Status</th><th>Last Updated</th><th>Owner/Agent</th><th>Notes</th></tr></thead><tbody id="strategy-registry-live"><tr><td colspan="8" style="text-align:center">Loading strategies…</td></tr></tbody></table>';
   var drawer = '<div class="drawer"><div class="drawer-title">Strategy Detail</div><h3 style="font-size:14px">CL EIA Inventory Drift ' + mxBadge('amber','YELLOW') + '</h3>' +
     '<p style="font-size:11px;color:var(--mx-muted);margin:8px 0">STR-CL-EIA-002</p><p style="font-size:12px;margin-bottom:12px">EIA inventory release drift strategy (WTI crude)</p>' +
     '<div class="drawer-section"><h4>Parameters</h4><ul class="kv-list"><li><span class="kv-key">Instrument</span><span class="kv-val">CL</span></li>' +

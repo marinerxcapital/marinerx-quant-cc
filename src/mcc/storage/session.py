@@ -11,6 +11,11 @@ from mcc.storage.database import get_engine
 _SessionLocal: sessionmaker[Session] | None = None
 
 
+def reset_session_factory() -> None:
+    global _SessionLocal
+    _SessionLocal = None
+
+
 def get_session_factory() -> sessionmaker[Session]:
     global _SessionLocal
     if _SessionLocal is None:

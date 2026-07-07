@@ -120,6 +120,10 @@
     if (window.LiveData) window.LiveData.hydrate(page);
     if (window.AgentData) window.AgentData.hydrate(page);
     if (window.TradeifyData) window.TradeifyData.hydrate(page);
+    if (page === 'strategy' && window.StrategiesData) window.StrategiesData.hydrate();
+    if (page === 'research' && window.BacktestData) window.BacktestData.hydrate();
+    if (page === 'risk' && window.RiskData) window.RiskData.hydrate();
+    if (page === 'decision' && window.DecisionData) window.DecisionData.hydrate();
   }
 
   function updateClock() {
