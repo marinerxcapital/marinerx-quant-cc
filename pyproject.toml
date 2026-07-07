@@ -48,6 +48,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["src"]
+norecursedirs = ["docs", "tradeify-sync", ".git", "node_modules"]
 
 [tool.ruff]
 line-length = 100

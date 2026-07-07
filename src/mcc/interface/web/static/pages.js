@@ -51,7 +51,7 @@ PAGES.home = function() {
   });
   ic += '</div>';
   return '<div class="page-header"><h1 class="page-title">Command Center Home</h1><p class="page-subtitle">System overview and agent command grid.</p></div>' +
-    '<div class="card" style="margin-bottom:16px">' + mxSection('1. Agent Command Grid', '15 Agents &nbsp; View All Agents &rarr;', grid) + '</div>' +
+    '<div class="card" style="margin-bottom:16px">' + mxSection('1. Agent Command Grid', '<span id="agent-grid-metrics">15 Agents</span> &nbsp; View All Agents &rarr;', grid) + '</div>' +
     '<div class="card">' + mxSection('2. Instrument Decision Center', 'Updated: 14:32:18 UTC &nbsp; View All Markets &rarr;', ic) + '</div>';
 };
 
@@ -133,7 +133,7 @@ PAGES.strategy = function() {
     ['STR-GC-ADX-008','GC Trend Filter Stack','v1.0','GC','REGISTERED','2025-05-29 15:02','Overseer','Registered for first pass.',''],
     ['STR-NQ-REV-009','NQ Overnight Reversal','v2.5','NQ','RED','2025-05-30 08:21','PerformanceAnalyst','Weak live consistency.','']
   ];
-  var tbl = '<table class="data-table"><thead><tr><th>Strategy ID</th><th>Name</th><th>Version</th><th>Instrument(s)</th><th>Status</th><th>Last Updated</th><th>Owner/Agent</th><th>Notes</th></tr></thead><tbody>';
+  var tbl = '<table class="data-table"><thead><tr><th>Strategy ID</th><th>Name</th><th>Version</th><th>Instrument(s)</th><th>Status</th><th>Last Updated</th><th>Owner/Agent</th><th>Notes</th></tr></thead><tbody id="strategy-registry-live">';
   rows.forEach(function(r) {
     var bc = r[4]==='GREEN'?'green':r[4]==='RED'?'red':r[4]==='YELLOW'?'amber':'neutral';
     tbl += '<tr class="' + r[8] + '"><td class="mono">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] +
@@ -157,12 +157,12 @@ PAGES.strategy = function() {
 
 PAGES.validation = function() {
   var hyps = [['CL EIA Drift','42','red','selected'],['NQ ORB Continuation','67','red',''],['GC VWAP Reversion','19','green',''],['ES/NQ Spread Mean Reversion','31','amber',''],['NQ Vol Compression Break','25','red','']];
-  var list = '<div class="card"><div class="card-title">Registered Hypotheses</div><ul style="list-style:none">';
+  var list = '<div class="card"><div class="card-title">Registered Hypotheses</div><div id="validation-live"><ul style="list-style:none">';
   hyps.forEach(function(h) {
     list += '<li style="padding:10px;border-bottom:1px solid var(--mx-border);' + (h[3]==='selected'?'background:var(--mx-blue-soft)':'') + '"><strong>' + h[0] +
       '</strong> <span class="mono" style="float:right">' + h[1] + '</span><br>' + mxBadge(h[2], h[2]==='green'?'GREEN':h[2]==='amber'?'YELLOW':'RED') + '</li>';
   });
-  list += '</ul></div>';
+  list += '</ul></div></div>';
   var stats = '<div class="stat-cards"><div class="stat-card"><div class="stat-card-label">OOS Net Profit Factor</div><div class="stat-card-value negative">0.97</div></div>' +
     '<div class="stat-card"><div class="stat-card-label">Deflated Sharpe Ratio</div><div class="stat-card-value negative">0.21</div></div>' +
     '<div class="stat-card"><div class="stat-card-label">Probabilistic Sharpe Ratio</div><div class="stat-card-value negative">48.6%</div></div>' +
@@ -214,7 +214,7 @@ PAGES.research = function() {
   });
   tbl += '</tbody></table>';
   return '<div class="page-header"><h1 class="page-title">Research Lab</h1><p class="page-subtitle">Quant and machine-learning experiment tracking.</p></div>' +
-    '<div class="card-title" style="margin-bottom:12px">Forecast Lab</div>' + cards +
+    '<div id="research-live"></div><div class="card-title" style="margin-bottom:12px">Forecast Lab</div>' + cards +
     '<div class="card"><div class="card-title">Experiment Tracker</div><div class="table-wrap">' + tbl + '</div></div>';
 };
 
@@ -291,7 +291,7 @@ PAGES.execution = function() {
     '<tr><td>GC</td><td>' + mxBadge('neutral','FLAT') + '</td><td>0</td><td>—</td><td class="mono">2,358.40</td><td>$0.00</td><td>—</td><td>—</td></tr>' +
     '<tr><td>CL</td><td>' + mxBadge('red','SHORT') + '</td><td>1</td><td class="mono">77.85</td><td class="mono">77.35</td><td class="negative">-$500.00</td><td class="mono">78.60</td><td class="mono">75.20</td></tr>' +
     '<tr><td>ES</td><td>' + mxBadge('neutral','FLAT') + '</td><td>0</td><td>—</td><td class="mono">5,293.75</td><td>$0.00</td><td>—</td><td>—</td></tr></tbody></table>';
-  var fills = '<table class="data-table"><thead><tr><th>Timestamp</th><th>Instrument</th><th>Side</th><th>Qty</th><th>Fill Price</th><th>Route</th><th>Status</th></tr></thead><tbody>' +
+  var fills = '<table class="data-table"><thead><tr><th>Timestamp</th><th>Instrument</th><th>Side</th><th>Qty</th><th>Fill Price</th><th>Route</th><th>Status</th></tr></thead><tbody id="execution-live">' +
     '<tr><td class="mono">2025-05-30 14:21:37</td><td>NQ</td><td class="positive">BUY</td><td>1</td><td class="mono">18,735.25</td><td>SIM-ROUTE-A</td><td>' + mxBadge('green','FILLED') + '</td></tr>' +
     '<tr><td class="mono">2025-05-30 14:10:02</td><td>CL</td><td class="negative">SELL</td><td>1</td><td class="mono">77.85</td><td>SIM-ROUTE-A</td><td>' + mxBadge('green','FILLED') + '</td></tr>' +
     '<tr><td class="mono">2025-05-30 13:45:26</td><td>ES</td><td class="positive">BUY</td><td>2</td><td class="mono">5,285.50</td><td>SIM-ROUTE-A</td><td>' + mxBadge('amber','PARTIAL') + '</td></tr></tbody></table>';
@@ -310,7 +310,7 @@ PAGES.journal = function() {
     ['2025-05-30','10:07:55','CL','SHORT','Inventory Drift Fade','STR-CL-EIA-002','77.42','76.81','+$610.00','Risk-On','GO',''],
     ['2025-05-30','09:38:11','GC','LONG','VWAP Reversion','STR-GC-VWAP-004','2,356.40','2,352.60','-$180.00','Risk-Off','NO-GO OVERRIDE','']
   ];
-  var tbl = '<table class="data-table"><thead><tr><th>Date</th><th>Time</th><th>Instrument</th><th>Side</th><th>Setup Tag</th><th>Strategy ID</th><th>Entry</th><th>Exit</th><th>Net P&amp;L</th><th>Regime at Entry</th><th>Decision</th></tr></thead><tbody>';
+  var tbl = '<table class="data-table" id="journal-live"><thead><tr><th>Date</th><th>Time</th><th>Instrument</th><th>Side</th><th>Setup Tag</th><th>Strategy ID</th><th>Entry</th><th>Exit</th><th>Net P&amp;L</th><th>Regime at Entry</th><th>Decision</th></tr></thead><tbody>';
   rows.forEach(function(r) {
     var sc = r[3]==='LONG'?'green':'red';
     var dc = r[10]==='GO'?'green':'red';
@@ -372,7 +372,7 @@ PAGES.reports = function() {
     ['Risk Summary — PropGuardian','Risk Management','2025-05-28 18:29 UTC','COMPLETED',''],
     ['Monthly Research Digest — June','Research Digest','2025-05-28 14:05 UTC','COMPLETED','']
   ];
-  var list = '<table class="data-table"><thead><tr><th>Report</th><th>Type</th><th>Generated</th><th>Status</th></tr></thead><tbody>';
+  var list = '<table class="data-table"><thead><tr><th>Report</th><th>Type</th><th>Generated</th><th>Status</th></tr></thead><tbody id="reports-live">';
   reps.forEach(function(r) {
     list += '<tr class="' + r[4] + '"><td><strong>' + r[0] + '</strong><br><span style="font-size:10px;color:var(--mx-muted)">' + r[1] + '</span></td><td>' + mxBadge('red','PDF') +
       '</td><td class="mono">' + r[2] + '</td><td>' + mxBadge('green', r[3]) + '</td></tr>';

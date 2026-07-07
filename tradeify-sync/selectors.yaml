@@ -1,0 +1,97 @@
+# DOM selectors discovered via `python main.py discover`.
+# Each entry: primary, fallbacks, wait (visible|attached|enabled).
+
+login:
+  username_input:
+    primary: "input[name='email'], input[type='email']"
+    fallbacks: ["#email", "input[autocomplete='username']"]
+    wait: visible
+  password_input:
+    primary: "input[name='password'], input[type='password']"
+    fallbacks: ["#password"]
+    wait: visible
+  submit_button:
+    primary: "button[type='submit']"
+    fallbacks: ["button:has-text('Sign in')", "button:has-text('Log in')"]
+    wait: enabled
+  twofa_input:
+    primary: "input[name='otp'], input[autocomplete='one-time-code']"
+    fallbacks: ["input[type='tel']"]
+    wait: visible
+  logged_in_marker:
+    primary: "[data-testid='dashboard-root'], nav.dashboard-nav"
+    fallbacks: [".user-menu", "[data-logged-in='true']"]
+    wait: visible
+
+accounts:
+  table_rows:
+    primary: "[data-testid='account-row']"
+    fallbacks: ["table.accounts tbody tr", ".account-card"]
+    wait: visible
+  column_map:
+    account_id: { selector: "[data-account-id]" }
+    nickname: { selector: "[data-nickname]" }
+    program: { selector: "[data-program]" }
+    phase: { selector: "[data-phase]" }
+    size_usd: { selector: "[data-size]" }
+    platform: { selector: "[data-platform]" }
+    status: { selector: "[data-status]" }
+    balance: { selector: "[data-balance]" }
+    equity: { selector: "[data-equity]" }
+    high_water_mark: { selector: "[data-hwm]" }
+    trailing_dd_amount: { selector: "[data-trailing-dd]" }
+    trailing_dd_floor: { selector: "[data-dd-floor]" }
+    daily_loss_limit: { selector: "[data-daily-loss-limit]" }
+    daily_pnl: { selector: "[data-daily-pnl]" }
+    days_traded: { selector: "[data-days-traded]" }
+    consistency_metric: { selector: "[data-consistency]" }
+    payout_eligible: { selector: "[data-payout-eligible]" }
+
+trades:
+  table_rows:
+    primary: "[data-testid='trade-row']"
+    fallbacks: ["table.trades tbody tr"]
+    wait: visible
+  pagination_next:
+    primary: "button.next-page:not([disabled])"
+    fallbacks: ["a.next-page:not(.disabled)"]
+    wait: enabled
+  export_button:
+    primary: "button:has-text('Export')"
+    fallbacks: ["a:has-text('Download CSV')"]
+    wait: visible
+  column_map:
+    trade_id: { selector: "[data-trade-id]" }
+    symbol_raw: { selector: "[data-symbol]" }
+    side: { selector: "[data-side]" }
+    qty: { selector: "[data-qty]" }
+    entry_time: { selector: "[data-entry-time]" }
+    entry_price: { selector: "[data-entry-price]" }
+    exit_time: { selector: "[data-exit-time]" }
+    exit_price: { selector: "[data-exit-price]" }
+    gross_pnl: { selector: "[data-gross-pnl]" }
+    fees: { selector: "[data-fees]" }
+    net_pnl: { selector: "[data-net-pnl]" }
+
+positions:
+  table_rows:
+    primary: "[data-testid='position-row']"
+    fallbacks: ["table.positions tbody tr"]
+    wait: visible
+  column_map:
+    symbol: { index: 0 }
+    side: { index: 1 }
+    qty: { index: 2 }
+    avg_price: { index: 3 }
+    unrealized_pnl: { index: 4 }
+
+payouts:
+  table_rows:
+    primary: "[data-testid='payout-row']"
+    fallbacks: ["table.payouts tbody tr"]
+    wait: visible
+  column_map:
+    request_date: { index: 0 }
+    amount: { index: 1 }
+    status: { index: 2 }
+    processed_date: { index: 3 }

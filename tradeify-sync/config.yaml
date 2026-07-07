@@ -1,0 +1,51 @@
+# Tradeify Sync Engine configuration
+# Copy .env.example to .env for credentials (never commit .env).
+
+tradeify:
+  # Replace with your Tradeify dashboard base URL (must be HTTPS).
+  base_url: "https://dashboard.tradeify.example"
+  login_path: "/login"
+
+browser:
+  headless: false
+  persist_session: true
+  session_path: "data/sessions/storage_state.json"
+  min_delay_ms: 800
+  max_delay_ms: 2500
+  timeout_ms: 30000
+
+sync:
+  cadence_minutes: 20
+  market_hours_only: true
+  timezone_display: "America/New_York"
+  timezone_store: "UTC"
+  backfill_days_on_first_run: 90
+  min_cadence_minutes: 5
+
+storage:
+  sqlite_path: "data/tradeify_sync.db"
+  parquet_dir: "data/parquet"
+  export_after_each_sync: true
+
+integration:
+  # Set true only if Command Center runs on Railway and needs a local read API.
+  remote_read_api_enabled: false
+
+instruments:
+  NQ:
+    tick_size: 0.25
+    tick_value: 5.00
+  ES:
+    tick_size: 0.25
+    tick_value: 12.50
+  CL:
+    tick_size: 0.01
+    tick_value: 10.00
+  GC:
+    tick_size: 0.10
+    tick_value: 10.00
+
+logging:
+  level: INFO
+  json: true
+  dir: "logs"

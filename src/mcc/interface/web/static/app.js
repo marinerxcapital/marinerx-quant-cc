@@ -118,6 +118,7 @@
     initCharts(page);
     if (page === 'home') pollHealth();
     if (window.LiveData) window.LiveData.hydrate(page);
+    if (window.AgentData) window.AgentData.hydrate(page);
     if (window.TradeifyData) window.TradeifyData.hydrate(page);
   }
 
@@ -186,6 +187,7 @@
     connectWS();
     setInterval(pollHealth, 5000);
     if (window.LiveData) window.LiveData.startPolling(function () { return currentPage; });
+    if (window.AgentData) window.AgentData.startPolling(function () { return currentPage; });
     if (window.TradeifyData) window.TradeifyData.startPolling(function () { return currentPage; });
     window.__mxCurrentPage = function () { return currentPage; };
     var hash = (location.hash || '#home').slice(1);

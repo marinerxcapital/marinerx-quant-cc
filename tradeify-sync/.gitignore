@@ -1,0 +1,13 @@
+.env
+data/sessions/
+data/downloads/
+data/*.db
+logs/
+screenshots/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+*.parquet
+.venv/
+dist/
+*.egg-info/

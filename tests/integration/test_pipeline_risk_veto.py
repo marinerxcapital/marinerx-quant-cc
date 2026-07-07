@@ -6,12 +6,49 @@ drives BAR/DECISION events through bootstrap + subscribed agents.
 from __future__ import annotations
 
 import asyncio
+import sqlite3
+import tempfile
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
 from mcc.core.events import DecisionEvent, Event, Topic
 from mcc.runtime.bootstrap import create_supervisor
+
+
+def _make_tradeify_db(path: Path) -> None:
+    conn = sqlite3.connect(str(path))
+    conn.execute(
+        """
+        CREATE TABLE accounts (
+            account_id TEXT PRIMARY KEY,
+            balance REAL, equity REAL, drawdown_headroom REAL,
+            daily_pnl REAL, last_synced_utc TEXT, phase TEXT, status TEXT
+        )
+        """
+    )
+    now = datetime.now(timezone.utc).isoformat()
+    conn.execute(
+        "INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        ("demo-150k", 150000.0, 150500.0, 4500.0, 500.0, now, "EVAL", "active"),
+    )
+    conn.commit()
+    conn.close()
+
+
+def _green_bar_payload(symbol: str = "NQ", price: float = 15010.0) -> dict:
+    return {
+        "symbol": symbol,
+        "c": price,
+        "o": price - 5,
+        "strategy_metrics": {
+            "oos_pf": 1.4,
+            "dsr": 0.8,
+            "folds_positive": 5,
+            "n_trades": 120,
+        },
+    }
 
 
 def _risk_lockout_event() -> Event:
@@ -30,9 +67,16 @@ def _risk_lockout_event() -> Event:
     )
 
 
+@pytest.fixture
+def tradeify_db(tmp_path):
+    path = tmp_path / "tradeify_sync.db"
+    _make_tradeify_db(path)
+    return str(path)
+
+
 @pytest.mark.asyncio
-async def test_pipeline_lockout_forces_no_go():
-    sup = create_supervisor(replay=True)
+async def test_pipeline_lockout_forces_no_go(tradeify_db):
+    sup = create_supervisor(replay=True, tradeify_db_path=tradeify_db)
     decisions: list[Event] = []
     fills: list[Event] = []
 
@@ -53,21 +97,21 @@ async def test_pipeline_lockout_forces_no_go():
     await asyncio.sleep(0.2)
 
     await sup.bus.publish(
-        Event(Topic.BAR, datetime.now(timezone.utc), "replay", {"symbol": "NQ"})
+        Event(Topic.BAR, datetime.now(timezone.utc), "replay", _green_bar_payload())
     )
     await asyncio.sleep(1.0)
     coll.cancel()
     await sup.kill_switch()
 
     assert len(decisions) >= 1
-    assert decisions[0].payload.get("decision") == "NO_GO"
+    assert decisions[-1].payload.get("decision") == "NO_GO"
     assert "risk" in decisions[0].payload.get("reason", "")
     assert len(fills) == 0
 
 
 @pytest.mark.asyncio
-async def test_pipeline_ok_state_produces_go():
-    sup = create_supervisor(replay=True)
+async def test_pipeline_ok_state_produces_go(tradeify_db):
+    sup = create_supervisor(replay=True, tradeify_db_path=tradeify_db)
     decisions: list[Event] = []
     fills: list[Event] = []
 
@@ -85,14 +129,14 @@ async def test_pipeline_ok_state_produces_go():
     await asyncio.sleep(0.3)
 
     await sup.bus.publish(
-        Event(Topic.BAR, datetime.now(timezone.utc), "replay", {"symbol": "NQ"})
+        Event(Topic.BAR, datetime.now(timezone.utc), "replay", _green_bar_payload())
     )
     await asyncio.sleep(1.0)
     coll.cancel()
     await sup.kill_switch()
 
     assert len(decisions) >= 1
-    assert decisions[0].payload.get("decision") == "GO"
+    assert decisions[-1].payload.get("decision") == "GO"
     assert len(fills) >= 1
 
 
