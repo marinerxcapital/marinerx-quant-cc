@@ -416,7 +416,14 @@ The build is **not complete** until all of the following are true:
 14. Tests pass (doctor + pytest)
 15. Documentation package exists
 
-**Current completion estimate:** ~55–65% of full master prompt (Git reconciled, Tier 1 APIs + persistence + partial Tier 2).
+**Current completion estimate:** ~70–75% of full master prompt (Git pushed, Tier 1+2 APIs, all 13 pages wired to APIs).
+
+**Memory files (read first in any new session):**
+- `grok.md` — Grok agent memory
+- `claude.md` — Claude agent memory + sellable gap analysis
+- `codex.md` — Codex implementation map + engineering gaps
+
+**GitHub HEAD:** `35aed8b` (pushed 2026-07-07)
 
 ### SuperGrok Subagent Package Run (2026-07-07)
 

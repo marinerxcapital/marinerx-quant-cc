@@ -50,9 +50,6 @@ class BrowserManager:
         downloads = self.settings.resolve("data/downloads")
         downloads.mkdir(parents=True, exist_ok=True)
 
-        storage_path = self.settings.resolve(self.settings.browser.session_path)
-        storage_state = str(storage_path) if storage_path.exists() else None
-
         self._context = await self._playwright.chromium.launch_persistent_context(
             user_data_dir=str(profile_dir),
             headless=self.settings.browser.headless,
@@ -63,7 +60,6 @@ class BrowserManager:
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/120.0.0.0 Safari/537.36"
             ),
-            storage_state=storage_state,
         )
         self._context.set_default_timeout(self.settings.browser.timeout_ms)
 
