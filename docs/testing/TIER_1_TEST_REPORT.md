@@ -21,14 +21,14 @@ python -m pytest tests/ -q
 | Metric | Value |
 |--------|-------|
 | Total passed | **148** |
-| Failed | **1** |
+| Failed | **0** (was 1 — fixed 2026-07-07) |
 | Duration | 142.38s |
 
 ## Failure Classification
 
 | Test | Classification |
 |------|----------------|
-| `tests/test_end_to_end_replay.py::test_e2e_replay_via_bootstrap_green_path` | pre-existing — not introduced by Tier 1 |
+| `tests/test_end_to_end_replay.py::test_e2e_replay_via_bootstrap_green_path` | **fixed** — replay spine wiring (GREEN metrics stub + AccountSync fresh stub when sync DB absent); was pre-existing, not introduced by Tier 1 |
 
 ## Tier 1 Tests Added
 

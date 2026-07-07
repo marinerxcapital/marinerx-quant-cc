@@ -124,6 +124,7 @@
     if (page === 'research' && window.BacktestData) window.BacktestData.hydrate();
     if (page === 'risk' && window.RiskData) window.RiskData.hydrate();
     if (page === 'decision' && window.DecisionData) window.DecisionData.hydrate();
+    if (window.Tier2Data) window.Tier2Data.hydrate(page);
   }
 
   function updateClock() {

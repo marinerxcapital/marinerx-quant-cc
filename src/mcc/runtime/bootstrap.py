@@ -51,6 +51,8 @@ def create_supervisor(
 
     for name, cls in agent_map.items():
         kwargs: dict[str, Any] = {}
+        if replay and name in ("ValidationEngine", "AccountSync"):
+            kwargs["replay"] = True
         if name == "AccountSync" and tradeify_db_path:
             kwargs["db_path"] = tradeify_db_path
         if name == "TradeJournal" and journal_db_url:

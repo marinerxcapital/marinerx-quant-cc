@@ -218,6 +218,23 @@ def _handle_signal(signum: int, _frame: object) -> None:
 
 
 @app.command()
+def login() -> None:
+    """Tradeify dashboard login (headed browser, manual 2FA). Persists session for sync."""
+    tradeify_main = ROOT / "tradeify-sync" / "main.py"
+    if not tradeify_main.exists():
+        console.print("[red]tradeify-sync package not found[/red]")
+        raise SystemExit(1)
+    console.print("[yellow]Opening Tradeify login — complete 2FA in the browser window.[/yellow]")
+    import subprocess
+
+    result = subprocess.run(
+        [sys.executable, str(tradeify_main), "login"],
+        cwd=str(ROOT / "tradeify-sync"),
+    )
+    raise SystemExit(result.returncode)
+
+
+@app.command()
 def run(interface: str = "web") -> None:
     """Start supervisor + 15 agents + web API or background worker."""
     if interface.lower() not in ("web", "worker"):

@@ -11,6 +11,10 @@ function mxSection(title, link, body) {
   return h + '</div>' + body;
 }
 
+function loadingBlock(msg) {
+  return '<div style="padding:32px;text-align:center;color:var(--mx-muted)">' + (msg || 'Loading…') + '</div>';
+}
+
 PAGES.home = function() {
   var agents = [
     ['Overseer','System oversight & orchestration','Running','Uptime 99.98%','green','green'],
@@ -56,40 +60,9 @@ PAGES.home = function() {
 };
 
 PAGES['market-pulse'] = function() {
-  var sparks = [
-    ['$TICK','+850','green','EXTREME','red','chart-tick'],
-    ['$TRIN','0.82','green','RISK-ON','green','chart-trin'],
-    ['$ADD','+1,742','green','','','chart-add'],
-    ['$VOLD','+2.8:1','green','','','chart-vold'],
-    ['$VIX','14.62','','','','chart-vix']
-  ];
-  var sc = '<div class="grid-5" style="margin-bottom:16px">';
-  sparks.forEach(function(s) {
-    sc += '<div class="sparkline-card"><div class="sparkline-label">' + s[0] + '</div><div class="sparkline-value ' +
-      (s[2]==='green'?'positive':'') + ' mono">' + s[1] + '</div>' +
-      (s[3]?mxBadge(s[4],s[3]):'') + '<div id="' + s[5] + '" style="height:40px"></div><div class="sparkline-ts">14:32:18 UTC</div></div>';
-  });
-  sc += '</div>';
-  var table = '<table class="data-table"><thead><tr><th>Component</th><th>Current</th><th>Direction</th><th>Weight</th><th>Impact</th></tr></thead><tbody>' +
-    '<tr><td>TICK</td><td class="num positive">+850</td><td>↑ Positive</td><td>25%</td><td class="num positive">+0.21</td></tr>' +
-    '<tr><td>TRIN</td><td class="num">0.82</td><td>↑ Positive</td><td>20%</td><td class="num positive">+0.16</td></tr>' +
-    '<tr><td>ADD</td><td class="num positive">+1,742</td><td>↑ Expanding</td><td>25%</td><td class="num positive">+0.24</td></tr>' +
-    '<tr><td>VOLD</td><td class="num positive">+2.8:1</td><td>↑ Positive</td><td>20%</td><td class="num positive">+0.15</td></tr>' +
-    '<tr><td>VIX</td><td class="num">14.62</td><td>↓ Declining</td><td>10%</td><td class="num positive">+0.09</td></tr></tbody></table>';
-  var regime = '<div class="card" style="margin-bottom:16px"><div class="grid-2"><div><div class="badge badge-lg badge-green">RISK-ON</div>' +
-    '<p style="margin-top:8px;font-weight:700">Confidence 74%</p><p style="font-size:12px;color:var(--mx-secondary)">TICK positive, ADD expanding, VOLD positive, VIX declining.</p></div>' +
-    '<div class="table-wrap">' + table + '<div style="text-align:right;margin-top:8px"><span class="mono positive">Total Impact +0.85</span> &nbsp; <span class="mono positive">Regime Score 85 / 100</span></div></div></div></div>';
-  var detail = '<div class="grid-4"><div class="card"><div class="card-title">Breadth Pressure Meter</div><div id="chart-breadth-gauge" style="height:140px"></div><div class="mono positive" style="text-align:center;font-size:18px;font-weight:800">+62 RISK-ON</div></div>' +
-    '<div class="card"><div class="card-title">Advance / Decline</div><table class="data-table"><thead><tr><th></th><th>Advancing</th><th>Declining</th><th>%</th></tr></thead><tbody>' +
-    '<tr><td>NYSE</td><td class="positive">2,354</td><td class="negative">876</td><td>73%</td></tr>' +
-    '<tr><td>NASDAQ</td><td class="positive">2,812</td><td class="negative">921</td><td>74%</td></tr>' +
-    '<tr><td>S&amp;P 500</td><td class="positive">387</td><td class="negative">113</td><td>77%</td></tr>' +
-    '<tr><td><strong>Total</strong></td><td class="positive"><strong>5,553</strong></td><td class="negative"><strong>1,910</strong></td><td><strong>74%</strong></td></tr></tbody></table></div>' +
-    '<div class="card"><div class="card-title">VIX Term Structure</div><div id="chart-vix-term" style="height:140px"></div></div>' +
-    '<div class="card"><div class="card-title">Session Breadth Timeline</div><div id="chart-breadth-timeline" style="height:140px"></div></div></div>';
   return '<div class="page-header"><h1 class="page-title">Market Pulse</h1><p class="page-subtitle">Real-time market internals and breadth telemetry.</p></div>' +
     '<div class="tabs"><button class="tab active">Internals</button><button class="tab">Microstructure</button><button class="tab">Heatmaps</button></div>' +
-    sc + regime + '<div class="card-title" style="margin-bottom:12px">Market Pulse Detail</div>' + detail;
+    '<div id="market-pulse-live">' + loadingBlock('Loading market pulse…') + '</div>';
 };
 
 PAGES.indicators = function() {
@@ -103,22 +76,14 @@ PAGES.indicators = function() {
       (i[2]?' checked':'') + '><span class="toggle-slider"></span></label></div>';
   });
   lib += '</div>';
-  var regimes = [['NQ','HIGH','TRENDING','72%','high'],['ES','NORMAL','RANGING','61%','normal'],['CL','HIGH','TRENDING','67%','high'],['GC','LOW','RANGING','58%','low']];
-  var rg = '<div class="grid-4" style="margin-top:16px">';
-  regimes.forEach(function(r) {
-    var bc = r[1]==='HIGH'?'red':r[1]==='NORMAL'?'amber':'green';
-    rg += '<div class="regime-card ' + r[4] + '"><div style="display:flex;justify-content:space-between"><strong>' + r[0] +
-      '</strong>' + mxBadge(bc, r[1]) + '</div><div style="margin:6px 0">' + mxBadge(bc, r[2]) + ' <span class="mono">' + r[3] + '</span></div>' +
-      '<div class="regime-prob-bar"><div class="regime-prob-fill" style="width:' + r[3] + ';background:var(--mx-' + bc + '-text)"></div></div></div>';
-  });
-  rg += '</div>';
   return '<div class="page-header"><h1 class="page-title">Indicators &amp; Regime</h1><p class="page-subtitle">Charting and regime classification.</p></div>' +
     '<div class="grid-2" style="grid-template-columns:280px 1fr;align-items:start"><div>' + lib + '</div>' +
     '<div class="card"><div class="tabs" id="indicator-symbol-tabs"><button class="tab active" data-tv-symbol="NQ">NQ</button><button class="tab" data-tv-symbol="ES">ES</button><button class="tab" data-tv-symbol="CL">CL</button><button class="tab" data-tv-symbol="GC">GC</button></div>' +
-    '<p class="mono" id="indicator-price-caption" style="font-size:11px;margin-bottom:8px">NQ • 5m • loading live quote…</p>' +
+    '<p class="mono" id="indicator-price-caption" style="font-size:11px;margin-bottom:8px">NQ • 15m • loading…</p>' +
     '<div id="tv-chart-indicators"></div>' +
     '<div id="chart-nq-candlestick" style="height:0;overflow:hidden"></div></div></div>' +
-    '<div class="card-title" style="margin-top:16px">Regime Snapshot</div>' + rg;
+    '<div class="card-title" style="margin-top:16px">Regime Snapshot</div>' +
+    '<div id="indicators-regime-live">' + loadingBlock('Loading regime data…') + '</div>';
 };
 
 PAGES.strategy = function() {
@@ -139,30 +104,8 @@ PAGES.strategy = function() {
 };
 
 PAGES.validation = function() {
-  var hyps = [['CL EIA Drift','42','red','selected'],['NQ ORB Continuation','67','red',''],['GC VWAP Reversion','19','green',''],['ES/NQ Spread Mean Reversion','31','amber',''],['NQ Vol Compression Break','25','red','']];
-  var list = '<div class="card"><div class="card-title">Registered Hypotheses</div><div id="validation-live"><ul style="list-style:none">';
-  hyps.forEach(function(h) {
-    list += '<li style="padding:10px;border-bottom:1px solid var(--mx-border);' + (h[3]==='selected'?'background:var(--mx-blue-soft)':'') + '"><strong>' + h[0] +
-      '</strong> <span class="mono" style="float:right">' + h[1] + '</span><br>' + mxBadge(h[2], h[2]==='green'?'GREEN':h[2]==='amber'?'YELLOW':'RED') + '</li>';
-  });
-  list += '</ul></div></div>';
-  var stats = '<div class="stat-cards"><div class="stat-card"><div class="stat-card-label">OOS Net Profit Factor</div><div class="stat-card-value negative">0.97</div></div>' +
-    '<div class="stat-card"><div class="stat-card-label">Deflated Sharpe Ratio</div><div class="stat-card-value negative">0.21</div></div>' +
-    '<div class="stat-card"><div class="stat-card-label">Probabilistic Sharpe Ratio</div><div class="stat-card-value negative">48.6%</div></div>' +
-    '<div class="stat-card"><div class="stat-card-label">Trial Count</div><div class="stat-card-value">42</div></div>' +
-    '<div class="stat-card"><div class="stat-card-label">OOS Trade Count</div><div class="stat-card-value">186</div></div></div>';
-  var wf = '<table class="data-table"><thead><tr><th>Fold</th><th>In-Sample Window</th><th>Out-of-Sample Window</th><th>Net P&amp;L</th><th>Pass/Fail</th></tr></thead><tbody>' +
-    '<tr><td>1</td><td>2023-01→2023-06</td><td>2023-07→2023-08</td><td class="negative">-$420</td><td>' + mxBadge('red','FAIL') + '</td></tr>' +
-    '<tr><td>2</td><td>2023-03→2023-08</td><td>2023-09→2023-10</td><td class="positive">+$190</td><td>' + mxBadge('green','PASS') + '</td></tr>' +
-    '<tr><td>3</td><td>2023-05→2023-10</td><td>2023-11→2023-12</td><td class="negative">-$160</td><td>' + mxBadge('red','FAIL') + '</td></tr>' +
-    '<tr><td>4</td><td>2023-07→2023-12</td><td>2024-01→2024-02</td><td class="positive">+$85</td><td>' + mxBadge('green','PASS') + '</td></tr>' +
-    '<tr><td>5</td><td>2023-09→2024-02</td><td>2024-03→2024-04</td><td class="negative">-$275</td><td>' + mxBadge('red','FAIL') + '</td></tr></tbody></table>';
-  var detail = '<div class="verdict-banner"><h3>VERDICT: RED — ARCHIVED</h3><p>OOS net PF 0.97, DSR not significant at 95%, 2/5 folds net-positive.</p></div>' +
-    '<h3 style="margin-bottom:12px">CL EIA Inventory-Day Post-Report Drift</h3>' + stats + '<div class="card table-wrap" style="margin-bottom:16px">' + wf + '</div>' +
-    '<div class="grid-2"><div class="card"><div class="card-title">Monte Carlo Drawdown Distribution</div><div id="chart-monte-carlo" style="height:220px"></div></div>' +
-    '<div class="card"><div class="card-title">Distribution Summary</div><ul class="kv-list"><li><span class="kv-key">Median (50%)</span><span class="kv-val">-14.1%</span></li>' +
-    '<li><span class="kv-key">95th Percentile</span><span class="kv-val">-3.2%</span></li><li><span class="kv-key">5th Percentile</span><span class="kv-val negative">-28.7%</span></li>' +
-    '<li><span class="kv-key">Observed DD</span><span class="kv-val negative">-17.2%</span></li></ul></div></div>';
+  var list = '<div class="card"><div class="card-title">Registered Strategies</div><div id="validation-live">' + loadingBlock('Loading strategies…') + '</div></div>';
+  var detail = '<div id="validation-detail-live">' + loadingBlock('Select a strategy and run validation.') + '</div>';
   return '<div class="page-header"><h1 class="page-title">Validation &amp; Verdicts</h1><p class="page-subtitle">Statistical strategy validation and verdict review.</p></div>' +
     '<div style="display:grid;grid-template-columns:260px 1fr;gap:16px">' + list + '<div>' + detail + '</div></div>';
 };
@@ -265,140 +208,40 @@ PAGES.decision = function() {
 
 PAGES.execution = function() {
   var banner = '<div class="live-banner"><strong>LIVE TRADING: DISABLED</strong><p>Enable requires explicit configuration + confirmation token in Settings.</p></div>';
-  var pills = ['Strategy GREEN','PropGuardian Clear','Size Within Caps','Session Open','No Event Blackout','Data Feed Healthy'];
-  var pl = '<div class="guardrail-row">';
-  pills.forEach(function(p) { pl += mxBadge('green', p); });
-  pl += '</div>';
-  var pos = '<table class="data-table"><thead><tr><th>Instrument</th><th>Side</th><th>Qty</th><th>Avg Price</th><th>Mark</th><th>Unrealized P&amp;L</th><th>Stop</th><th>Target</th></tr></thead><tbody>' +
-    '<tr><td>NQ</td><td>' + mxBadge('green','LONG') + '</td><td>2</td><td class="mono">18,421.25</td><td class="mono">18,742.50</td><td class="positive">+$642.50</td><td class="mono">18,200.00</td><td class="mono">19,100.00</td></tr>' +
-    '<tr><td>GC</td><td>' + mxBadge('neutral','FLAT') + '</td><td>0</td><td>—</td><td class="mono">2,358.40</td><td>$0.00</td><td>—</td><td>—</td></tr>' +
-    '<tr><td>CL</td><td>' + mxBadge('red','SHORT') + '</td><td>1</td><td class="mono">77.85</td><td class="mono">77.35</td><td class="negative">-$500.00</td><td class="mono">78.60</td><td class="mono">75.20</td></tr>' +
-    '<tr><td>ES</td><td>' + mxBadge('neutral','FLAT') + '</td><td>0</td><td>—</td><td class="mono">5,293.75</td><td>$0.00</td><td>—</td><td>—</td></tr></tbody></table>';
-  var fills = '<table class="data-table"><thead><tr><th>Timestamp</th><th>Instrument</th><th>Side</th><th>Qty</th><th>Fill Price</th><th>Route</th><th>Status</th></tr></thead><tbody id="execution-live">' +
-    '<tr><td class="mono">2025-05-30 14:21:37</td><td>NQ</td><td class="positive">BUY</td><td>1</td><td class="mono">18,735.25</td><td>SIM-ROUTE-A</td><td>' + mxBadge('green','FILLED') + '</td></tr>' +
-    '<tr><td class="mono">2025-05-30 14:10:02</td><td>CL</td><td class="negative">SELL</td><td>1</td><td class="mono">77.85</td><td>SIM-ROUTE-A</td><td>' + mxBadge('green','FILLED') + '</td></tr>' +
-    '<tr><td class="mono">2025-05-30 13:45:26</td><td>ES</td><td class="positive">BUY</td><td>2</td><td class="mono">5,285.50</td><td>SIM-ROUTE-A</td><td>' + mxBadge('amber','PARTIAL') + '</td></tr></tbody></table>';
-  var form = '<div class="card order-form"><div class="card-title">New Order (Paper Mode)</div><p style="font-size:11px;color:var(--mx-muted);margin-bottom:12px">Order entry is disabled in paper mode. All activity is simulated only.</p>' +
-    '<div class="grid-4"><input disabled placeholder="Instrument" style="padding:8px;border:1px solid var(--mx-border);border-radius:6px"><select disabled style="padding:8px"><option>Side</option></select>' +
-    '<input disabled value="0" style="padding:8px;border:1px solid var(--mx-border);border-radius:6px"><button disabled class="btn-secondary">Submit Order</button></div></div>';
-  return '<div class="page-header"><h1 class="page-title">Execution &amp; Orders</h1></div>' + banner + pl +
-    '<div class="grid-2" style="margin:16px 0"><div class="card table-wrap"><div class="card-title">Open Positions (Paper)</div>' + pos + '</div>' +
-    '<div class="card table-wrap"><div class="card-title">Recent Fills (Paper)</div>' + fills + '</div></div>' + form;
+  return '<div class="page-header"><h1 class="page-title">Execution &amp; Orders</h1></div>' + banner +
+    '<div id="execution-live">' + loadingBlock('Loading paper execution state…') + '</div>';
 };
 
 PAGES.journal = function() {
-  var rows = [
-    ['2025-05-30','11:42:07','NQ','LONG','Opening Range Breakout','STR-NQ-ORB-001','18,612.50','18,675.00','+$312.50','Risk-On','GO','selected'],
-    ['2025-05-30','11:18:32','ES','LONG','IB Breakout','STR-ES-IB-007','5,292.50','5,300.25','+$155.00','Risk-On','GO',''],
-    ['2025-05-30','10:07:55','CL','SHORT','Inventory Drift Fade','STR-CL-EIA-002','77.42','76.81','+$610.00','Risk-On','GO',''],
-    ['2025-05-30','09:38:11','GC','LONG','VWAP Reversion','STR-GC-VWAP-004','2,356.40','2,352.60','-$180.00','Risk-Off','NO-GO OVERRIDE','']
-  ];
-  var tbl = '<table class="data-table" id="journal-live"><thead><tr><th>Date</th><th>Time</th><th>Instrument</th><th>Side</th><th>Setup Tag</th><th>Strategy ID</th><th>Entry</th><th>Exit</th><th>Net P&amp;L</th><th>Regime at Entry</th><th>Decision</th></tr></thead><tbody>';
-  rows.forEach(function(r) {
-    var sc = r[3]==='LONG'?'green':'red';
-    var dc = r[10]==='GO'?'green':'red';
-    tbl += '<tr class="' + r[11] + '"><td>' + r[0] + '</td><td class="mono">' + r[1] + '</td><td>' + r[2] + '</td><td>' + mxBadge(sc, r[3]) +
-      '</td><td>' + r[4] + '</td><td class="mono">' + r[5] + '</td><td class="mono">' + r[6] + '</td><td class="mono">' + r[7] +
-      '</td><td class="' + (r[8].startsWith('+')?'positive':'negative') + '">' + r[8] + '</td><td>' + r[9] + '</td><td>' + mxBadge(dc, r[10]) + '</td></tr>';
-  });
-  tbl += '</tbody></table>';
-  var detail = '<div class="card" style="margin-top:16px;border-left:4px solid var(--mx-blue)"><strong>NQ — Opening Range Breakout</strong>' +
-    '<p style="font-size:12px;margin:8px 0"><strong>Decision Engine Reason:</strong> ORB breakout confirmed with 5-min volume expansion, regime Risk-On, validation GREEN.</p>' +
-    '<p style="font-size:12px"><strong>Trader Notes:</strong> Entry followed plan. Partial exit was late.</p>' +
-    '<div style="margin-top:8px;padding:8px;background:var(--mx-bg);border-radius:6px;font-size:11px">📷 screenshot attached — 2025-05-30 11:55 UTC — ResearchLab</div></div>';
   return '<div class="page-header"><h1 class="page-title">Trade Journal</h1><p class="page-subtitle">Structured trade log with setup context, execution details, and outcomes.</p></div>' +
-    '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><select style="padding:8px;border:1px solid var(--mx-border);border-radius:6px"><option>Instrument: All</option></select>' +
-    '<input placeholder="Search trades..." style="flex:1;min-width:200px;padding:8px;border:1px solid var(--mx-border);border-radius:6px">' +
-    '<button class="btn-secondary">Export CSV</button><button class="btn-primary">New Note</button></div>' +
-    '<div class="card table-wrap">' + tbl + '</div>' + detail;
+    '<div id="journal-live">' + loadingBlock('Loading journal entries…') + '</div>';
 };
 
 PAGES.performance = function() {
-  var stats = '<div class="grid-4" style="margin-bottom:12px"><div><span class="mono positive" style="font-size:18px;font-weight:800">+$8,420</span><div style="font-size:10px;color:var(--mx-muted)">Net P&amp;L</div></div>' +
-    '<div><span class="mono negative" style="font-size:18px;font-weight:800">-$2,180</span><div style="font-size:10px;color:var(--mx-muted)">Max DD</div></div>' +
-    '<div><span class="mono" style="font-size:18px;font-weight:800">58%</span><div style="font-size:10px;color:var(--mx-muted)">Win Rate</div></div>' +
-    '<div><span class="mono" style="font-size:18px;font-weight:800">1.42</span><div style="font-size:10px;color:var(--mx-muted)">Profit Factor</div></div></div>';
-  var exp = [['Opening Range Breakout',0.28],['Trend Filter',0.18],['VWAP Reversion',0.07],['Momentum Continuation',-0.21],['Overnight Reversal',-0.32]];
-  var eb = '';
-  exp.forEach(function(e) {
-    var w = Math.abs(e[1]) * 100;
-    var cls = e[1] >= 0 ? 'green' : 'red';
-    eb += '<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:11px"><span>' + e[0] + '</span><span class="mono ' + (e[1]>=0?'positive':'negative') + '">' + e[1] + ' R</span></div>' +
-      '<div class="progress-bar"><div class="progress-fill ' + cls + '" style="width:' + w + '%"></div></div></div>';
-  });
-  var attr = '<div class="card"><div class="card-title">Decision Attribution</div><ul style="list-style:none;font-size:12px;line-height:2">' +
-    '<li>✓ Profitable GO calls: <strong class="positive">47</strong></li><li>✗ Unprofitable GO calls: <strong class="negative">34</strong></li>' +
-    '<li>GO call hit rate: <strong>58%</strong></li><li>NO-GO counterfactual avoided: <strong>12</strong> losing setups</li></ul></div>';
-  var ptable = '<table class="data-table"><thead><tr><th>Decision</th><th>Trades</th><th>Win Rate</th><th>Net P&amp;L (USD)</th><th>Avg P&amp;L (R)</th><th>Profit Factor</th><th>Max DD (USD)</th></tr></thead><tbody>' +
-    '<tr><td>GO</td><td>81</td><td>58%</td><td class="positive">+$8,240</td><td>0.42</td><td>1.68</td><td class="negative">-$1,520</td></tr>' +
-    '<tr><td>NO-GO</td><td>104</td><td>—</td><td class="positive">+$2,820</td><td>—</td><td>—</td><td>—</td></tr>' +
-    '<tr><td>STAND-ASIDE</td><td>63</td><td>—</td><td>$0</td><td>—</td><td>—</td><td>—</td></tr>' +
-    '<tr><td><strong>TOTAL</strong></td><td>248</td><td>—</td><td class="positive"><strong>+$9,060</strong></td><td>0.29</td><td>1.42</td><td class="negative">-$2,180</td></tr></tbody></table>';
-  return '<div class="page-header"><h1 class="page-title">Performance Analytics</h1><p class="page-subtitle">Paper-simulated performance from live NQ returns (yfinance).</p></div>' +
+  return '<div class="page-header"><h1 class="page-title">Performance Analytics</h1><p class="page-subtitle">Performance from stored paper orders — labeled SIMULATED when empty.</p></div>' +
     '<div class="card" id="tradeify-payout-live" style="margin-bottom:16px"></div>' +
     '<div class="card" style="margin-bottom:16px"><div class="card-title">Benchmark — NQ Futures (TradingView)</div><div id="tv-chart-performance"></div></div>' +
-    '<div class="grid-2" style="margin-bottom:16px"><div class="card"><div class="card-title">Equity Curve &amp; Drawdown</div><div id="perf-stats-live">' + stats + '</div>' +
+    '<div class="grid-2" style="margin-bottom:16px"><div class="card"><div class="card-title">Equity Curve &amp; Drawdown</div>' +
+    '<div id="perf-stats-live">' + loadingBlock('Loading performance summary…') + '</div>' +
     '<div id="chart-equity-dd" style="height:280px"></div></div>' +
-    '<div><div class="card" style="margin-bottom:16px"><div class="card-title">Rolling Sharpe Ratio</div><div class="mono">0.64</div><div id="chart-sharpe" style="height:100px"></div></div>' +
-    '<div class="card"><div class="card-title">Rolling Sortino Ratio</div><div class="mono">0.98</div><div id="chart-sortino" style="height:100px"></div></div></div></div>' +
-    '<div class="grid-3" style="margin-bottom:16px"><div class="card"><div class="card-title">Expectancy by Setup</div>' + eb + '</div>' +
-    '<div class="card"><div class="card-title">Expectancy by Regime</div><p style="font-size:11px">Trending/Low Vol: <span class="positive">0.36 R</span></p></div>' +
-    '<div class="card"><div class="card-title">Expectancy by Instrument</div><p style="font-size:11px">NQ: <span class="positive">0.34 R</span> &nbsp; CL: <span class="negative">-0.07 R</span></p></div></div>' +
-    '<div class="grid-2">' + attr + '<div class="card table-wrap"><div class="card-title">Performance by Decision</div>' + ptable + '</div></div>';
+    '<div class="card"><div class="card-title">Attribution</div><p style="font-size:12px;color:var(--mx-muted);padding:16px">Breakdown populated when trade history exists.</p></div></div>';
 };
 
 PAGES.reports = function() {
-  var reps = [
-    ['Weekly Performance — Week of Jun29','Performance Summary','2025-06-30 09:12 UTC','COMPLETED',''],
-    ['Verdict Memo — CL EIA Inventory Drift','Validation & Verdict','2025-05-30 12:41 UTC','COMPLETED','selected'],
-    ['Verdict Memo — NQ Opening Range','Validation & Verdict','2025-05-30 10:36 UTC','COMPLETED',''],
-    ['Risk Summary — PropGuardian','Risk Management','2025-05-28 18:29 UTC','COMPLETED',''],
-    ['Monthly Research Digest — June','Research Digest','2025-05-28 14:05 UTC','COMPLETED','']
-  ];
-  var list = '<table class="data-table"><thead><tr><th>Report</th><th>Type</th><th>Generated</th><th>Status</th></tr></thead><tbody id="reports-live">';
-  reps.forEach(function(r) {
-    list += '<tr class="' + r[4] + '"><td><strong>' + r[0] + '</strong><br><span style="font-size:10px;color:var(--mx-muted)">' + r[1] + '</span></td><td>' + mxBadge('red','PDF') +
-      '</td><td class="mono">' + r[2] + '</td><td>' + mxBadge('green', r[3]) + '</td></tr>';
-  });
-  list += '</tbody></table>';
-  var preview = '<div class="card" style="min-height:400px"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><strong>Verdict Memo — CL EIA Inventory Drift</strong>' +
-    '<div><button class="btn-secondary">Download</button> <button class="btn-secondary">Export</button> <button class="btn-primary">Open Full Report</button></div></div>' +
-    '<p style="font-size:11px;color:var(--mx-muted)">MarinerX Labs Research System</p>' +
-    '<h3 style="margin:12px 0">Verdict Memo — CL EIA Inventory-Day Post-Report Drift</h3>' + mxBadge('red','VERDICT: RED — ARCHIVED') +
-    '<p style="font-size:12px;margin:12px 0">OOS net PF 0.97, DSR not significant at 95%, 2/5 folds net-positive.</p>' +
-    '<div id="chart-wf-bars" style="height:160px"></div>' +
-    '<ul class="kv-list" style="margin-top:12px"><li><span class="kv-key">OOS Net Profit Factor</span><span class="kv-val negative">0.97</span></li>' +
-    '<li><span class="kv-key">Trial Count</span><span class="kv-val">42</span></li><li><span class="kv-key">Observed DD</span><span class="kv-val negative">-17.2%</span></li></ul>' +
-    '<p style="font-size:10px;color:var(--mx-muted);margin-top:12px">Generated: 2025-05-30 12:41 UTC &nbsp; Page 1 of 7</p></div>';
+  var preview = '<div class="card" style="min-height:400px"><div class="card-title">Report Preview</div>' +
+    '<p style="font-size:12px;color:var(--mx-muted);padding:24px">Select a report from the list or generate a new report.</p></div>';
   return '<div class="page-header"><h1 class="page-title">Reports</h1><p class="page-subtitle">View, download, and manage generated research reports and documents.</p></div>' +
-    '<div style="display:grid;grid-template-columns:40% 60%;gap:16px"><div class="card table-wrap"><div class="card-title">Generated Reports</div>' + list + '</div>' + preview + '</div>';
+    '<div style="display:grid;grid-template-columns:40% 60%;gap:16px"><div class="card" id="reports-live">' + loadingBlock('Loading reports…') + '</div>' + preview + '</div>';
 };
 
 PAGES.settings = function() {
-  var feeds = '<table class="data-table"><thead><tr><th>Feed</th><th>Status</th><th>Description</th><th>Latency</th></tr></thead><tbody>' +
-    '<tr><td>Databento</td><td>' + mxBadge('green','CONNECTED') + '</td><td>Market data (NQ, ES, CL, GC)</td><td class="mono">200 ms</td></tr>' +
-    '<tr><td>IQFeed</td><td>' + mxBadge('neutral','NOT CONFIGURED') + '</td><td>Backup market data</td><td>—</td></tr>' +
-    '<tr><td>Tradovate</td><td>' + mxBadge('neutral','NOT CONFIGURED') + '</td><td>Futures execution</td><td>—</td></tr>' +
-    '<tr><td>Tradeify Sync</td><td>' + mxBadge('blue','LAST SYNCED') + '</td><td>Trade journal sync</td><td>4 MIN AGO</td></tr>' +
-    '<tr><td>Railway Deployment</td><td>' + mxBadge('green','HEALTHY') + '</td><td>Application deployment</td><td>100%</td></tr>' +
-    '<tr><td>Database</td><td>' + mxBadge('green','HEALTHY') + '</td><td>PostgreSQL database</td><td>100%</td></tr></tbody></table>';
-  var config = '<ul class="kv-list"><li><span class="kv-key">Risk Per Trade</span><span class="kv-val">$350</span></li>' +
-    '<li><span class="kv-key">Daily Loss Limit</span><span class="kv-val">$2,000</span></li><li><span class="kv-key">Max Contracts</span><span class="kv-val">3</span></li>' +
-    '<li><span class="kv-key">Instruments Enabled</span><span class="kv-val">NQ / ES / CL / GC</span></li><li><span class="kv-key">Live Execution</span><span class="kv-val negative">DISABLED</span></li>' +
-    '<li><span class="kv-key">Paper Trading</span><span class="kv-val positive">ENABLED</span></li><li><span class="kv-key">Account Mode</span><span class="kv-val">Evaluation</span></li></ul>';
   var danger = '<div class="danger-zone"><p style="font-size:12px;margin-bottom:12px">Critical system controls. Actions are immediate and irreversible.</p>' +
     '<button class="btn-kill" style="width:100%;margin-bottom:12px">GLOBAL KILL SWITCH</button>' +
     '<label style="font-size:12px;display:flex;gap:8px;margin-bottom:12px"><input type="checkbox"> I understand this will flatten/disable all active execution routes</label>' +
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label><span>Live Execution OFF — DISABLED</span></div>' +
     '<input placeholder="confirmation token" style="width:100%;padding:8px;border:1px solid var(--mx-border);border-radius:6px"></div>';
-  var audit = '<table class="data-table"><thead><tr><th>Timestamp</th><th>User/System</th><th>Action</th><th>Result</th></tr></thead><tbody>' +
-    '<tr><td class="mono">2025-05-30 14:31:02 UTC</td><td>ResearchLab</td><td>Risk config read</td><td>' + mxBadge('green','SUCCESS') + '</td></tr>' +
-    '<tr><td class="mono">2025-05-30 14:30:15 UTC</td><td>ResearchLab</td><td>Paper trading enabled</td><td>' + mxBadge('green','SUCCESS') + '</td></tr>' +
-    '<tr><td class="mono">2025-05-30 14:29:41 UTC</td><td>ResearchLab</td><td>Live execution disabled</td><td>' + mxBadge('green','SUCCESS') + '</td></tr></tbody></table>';
   return '<div class="page-header"><h1 class="page-title">Settings &amp; System Control</h1><p class="page-subtitle">System configuration, data feeds, execution controls, and audit.</p></div>' +
     '<div class="card" id="tradeify-connector-live" style="margin-bottom:16px"></div>' +
-    '<div class="grid-2" style="margin-bottom:16px"><div class="card table-wrap"><div class="card-title">Data &amp; Feed Status</div>' + feeds + '</div>' +
-    '<div class="card"><div class="card-title">Configuration (Read-Only)</div>' + config + '</div></div>' +
-    '<div class="card" style="margin-bottom:16px">' + danger + '</div>' +
-    '<div class="card table-wrap"><div class="card-title">Audit Log</div>' + audit + '</div>';
+    '<div id="settings-live">' + loadingBlock('Loading system configuration…') + '</div>' +
+    '<div class="card" style="margin-top:16px;margin-bottom:16px">' + danger + '</div>';
 };

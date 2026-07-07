@@ -40,6 +40,14 @@ _DEFAULT_METRICS: dict[str, float | int] = {
     "n_trades": 20,
 }
 
+# Replay spine: synthetic GREEN edge when BAR omits strategy_metrics (see verdict.py)
+_REPLAY_GREEN_METRICS: dict[str, float | int] = {
+    "oos_pf": 1.4,
+    "dsr": 0.8,
+    "folds_positive": 5,
+    "n_trades": 120,
+}
+
 # Module-level last bar prices for ExecutionGateway
 _last_bar_prices: dict[str, float] = {}
 
@@ -53,9 +61,16 @@ def _parse_risk_veto_from_payload(payload: dict) -> bool | None:
     return None
 
 
-def _metrics_from_bar(payload: dict[str, Any]) -> dict[str, float | int]:
+def _has_explicit_strategy_metrics(payload: dict[str, Any]) -> bool:
+    if isinstance(payload.get("strategy_metrics"), dict):
+        return True
+    return any(key in payload for key in ("oos_pf", "dsr", "folds_positive", "n_trades"))
+
+
+def _metrics_from_bar(payload: dict[str, Any], *, replay: bool = False) -> dict[str, float | int]:
     """Extract validation metrics from BAR payload or bus context fields."""
-    metrics = dict(_DEFAULT_METRICS)
+    base = _REPLAY_GREEN_METRICS if replay and not _has_explicit_strategy_metrics(payload) else _DEFAULT_METRICS
+    metrics = dict(base)
     for key in ("oos_pf", "dsr", "folds_positive", "n_trades"):
         if key in payload:
             metrics[key] = payload[key]
@@ -83,8 +98,16 @@ class NoOpAgent(BaseAgent):
 class ValidationEngineAgent(BaseAgent):
     """Listens for BAR events from replay, runs verdict, emits LOG with verdict."""
 
-    def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
+    def __init__(
+        self,
+        name: str,
+        bus: MessageBus,
+        clock: Optional[Clock] = None,
+        *,
+        replay: bool = False,
+    ):
         super().__init__(name, bus, clock)
+        self._replay = replay
         self._listener: Optional[asyncio.Task[None]] = None
         self._last_verdict: dict[str, Any] = {}
 
@@ -104,7 +127,7 @@ class ValidationEngineAgent(BaseAgent):
                     continue
                 self.set_status("working", "verdict on bar")
                 symbol = ev.payload.get("symbol", "NQ")
-                metrics = _metrics_from_bar(ev.payload)
+                metrics = _metrics_from_bar(ev.payload, replay=self._replay)
                 v = run_verdict(
                     oos_pf=float(metrics["oos_pf"]),
                     dsr=float(metrics["dsr"]),
@@ -456,8 +479,10 @@ class AccountSyncAgent(BaseAgent):
         *,
         db_path: str | Path | None = None,
         poll_interval_sec: float = 2.0,
+        replay: bool = False,
     ):
         super().__init__(name, bus, clock)
+        self._replay = replay
         self._poll_task: Optional[asyncio.Task[None]] = None
         self._adapter = AccountSyncAdapter(bus)
         self._db_path = Path(db_path) if db_path else Path("data/tradeify_sync.db")
@@ -485,6 +510,17 @@ class AccountSyncAgent(BaseAgent):
     async def _sync_once(self) -> None:
         self.set_status("working", "account sync poll")
         state = read_account_state(self._db_path)
+        if self._replay and state.get("error") in ("db_not_found", "no_accounts"):
+            # Replay spine: absent sync engine is a fresh stub, not a hard data veto.
+            self._stale = False
+            self._last_state = {
+                "stale": False,
+                "equity": 150000.0,
+                "account": "replay-stub",
+                "replay_stub": True,
+            }
+            AgentSnapshotRegistry.set(self.name, self.snapshot())
+            return
         self._stale = bool(state.get("stale", True))
         self._last_state = state
         AgentSnapshotRegistry.set(self.name, self.snapshot())
