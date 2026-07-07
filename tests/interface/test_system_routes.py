@@ -107,6 +107,18 @@ def test_data_freshness_endpoint(client, mock_yfinance):
     assert "max_age_seconds" in market
 
 
+def test_db_health_endpoint(client, memory_db):
+    r = client.get("/api/db-health")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] in ("ok", "degraded", "error")
+    assert "tables_present" in body
+    assert "tier1_column_checks" in body
+    assert "sample_queries" in body
+    assert body["tier1_column_checks"]["strategies"]["exists"] is True
+    assert body["sample_queries"]["strategies"]["ok"] is True
+
+
 def test_stale_market_data_flags_degraded(client, memory_db, monkeypatch):
     import time
 

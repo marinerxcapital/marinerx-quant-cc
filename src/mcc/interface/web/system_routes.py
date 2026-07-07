@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import APIRouter
 
 from mcc.core.config import get_settings
+from mcc.storage.database import build_db_health
 from mcc.system.state import (
     build_config_check,
     build_data_freshness,
@@ -34,3 +35,9 @@ def system_state() -> dict[str, Any]:
 @router.get("/api/data-freshness")
 def data_freshness() -> dict[str, Any]:
     return build_data_freshness()
+
+
+@router.get("/api/db-health")
+def db_health() -> dict[str, Any]:
+    """Schema and query diagnostics for production troubleshooting."""
+    return build_db_health()

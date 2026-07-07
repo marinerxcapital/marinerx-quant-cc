@@ -98,6 +98,7 @@ def doctor() -> None:
         t.add_row("production config", f"SKIP/WARN {exc}")
 
     try:
+        settings.ensure_directories()
         init_db()
         db_health = check_database_connectivity()
         t.add_row("database", f"OK {db_health.get('backend', 'unknown')}")
@@ -169,6 +170,7 @@ async def _launch(interface: str) -> None:
     _configure_logging()
 
     settings = get_settings()
+    settings.ensure_directories()
     settings.validate_production_requirements()
     init_db()
 
