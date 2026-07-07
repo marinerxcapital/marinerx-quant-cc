@@ -186,6 +186,7 @@
     setInterval(updateClock, 1000);
     connectWS();
     setInterval(pollHealth, 5000);
+    if (window.SystemState) window.SystemState.start();
     if (window.LiveData) window.LiveData.startPolling(function () { return currentPage; });
     if (window.AgentData) window.AgentData.startPolling(function () { return currentPage; });
     if (window.TradeifyData) window.TradeifyData.startPolling(function () { return currentPage; });

@@ -1,0 +1,1 @@
+"""Operational system truth — status, freshness, config presence."""

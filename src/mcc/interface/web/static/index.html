@@ -38,22 +38,22 @@
     </aside>
     <div class="main-area">
       <header class="top-header">
-        <div class="header-status">
-          <span class="status-dot"></span>
-          ALL SYSTEMS NOMINAL
+        <div class="header-status" id="header-system-status">
+          <span class="status-dot neutral"></span>
+          CHECKING SYSTEM STATE…
         </div>
         <div class="header-metrics" id="header-metrics-live">
           <div class="header-metric">
             <span class="header-metric-label">Day P&amp;L</span>
-            <span class="header-metric-value positive">+$1,240</span>
+            <span class="header-metric-value">—</span>
           </div>
           <div class="header-metric">
             <span class="header-metric-label">Week P&amp;L</span>
-            <span class="header-metric-value positive">+$3,870</span>
+            <span class="header-metric-value">—</span>
           </div>
           <div class="header-metric">
             <span class="header-metric-label">Drawdown Headroom</span>
-            <span class="header-metric-value">$4,620</span>
+            <span class="header-metric-value">Awaiting sync</span>
           </div>
         </div>
         <div class="header-right">
@@ -65,6 +65,7 @@
     </div>
   </div>
   <script src="/static/pages.js"></script>
+  <script src="/static/system-state.js"></script>
   <script src="/static/tradingview.js"></script>
   <script src="/static/live-data.js"></script>
   <script src="/static/agent-data.js"></script>

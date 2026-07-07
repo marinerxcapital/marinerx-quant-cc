@@ -497,6 +497,34 @@ def clear_cache() -> None:
     _cache.clear()
 
 
+def get_cache_freshness() -> dict[str, Any]:
+    """Return per-cache-key age for system truth / data-freshness endpoints."""
+    now = time.time()
+    sources: dict[str, Any] = {}
+    for key, entry in _cache.items():
+        age = max(0, int(now - entry.ts))
+        sources[key] = {
+            "last_updated": datetime.fromtimestamp(entry.ts, tz=timezone.utc).isoformat(),
+            "age_seconds": age,
+            "max_age_seconds": CACHE_TTL_SEC,
+            "status": "fresh" if age <= CACHE_TTL_SEC else "stale",
+            "source": "yfinance_proxy",
+        }
+    if not sources:
+        sources["market_data"] = {
+            "last_updated": None,
+            "age_seconds": None,
+            "max_age_seconds": CACHE_TTL_SEC,
+            "status": "missing",
+            "source": "yfinance_proxy",
+        }
+    return {
+        "provider": "yfinance_proxy",
+        "cache_keys": sources,
+        "as_of": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 def optional_alpha_vantage_quote(symbol: str) -> dict[str, Any] | None:
     """Optional boost when user sets free Alpha Vantage key (5 calls/min)."""
     key = os.environ.get("ALPHA_VANTAGE_API_KEY", "").strip()
