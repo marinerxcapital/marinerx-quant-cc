@@ -94,6 +94,8 @@ class Secrets(BaseSettings):
     tradeify_username: str = Field(default="", alias="TRADEIFY_USERNAME")
     tradeify_password: str = Field(default="", alias="TRADEIFY_PASSWORD")
     tradeify_totp_secret: str = Field(default="", alias="TRADEIFY_TOTP_SECRET")
+    tradeify_base_url: str = Field(default="", alias="TRADEIFY_BASE_URL")
+    tradeify_login_path: str = Field(default="", alias="TRADEIFY_LOGIN_PATH")
     alert_email: str = Field(default="", alias="ALERT_EMAIL")
     smtp_url: str = Field(default="", alias="SMTP_URL")
 
@@ -133,9 +135,15 @@ class Settings(BaseModel):
         else:
             secrets = Secrets()
 
+        tradeify_raw = dict(raw.get("tradeify", {}))
+        if secrets.tradeify_base_url:
+            tradeify_raw["base_url"] = secrets.tradeify_base_url
+        if secrets.tradeify_login_path:
+            tradeify_raw["login_path"] = secrets.tradeify_login_path
+
         try:
             settings = cls(
-                tradeify=TradeifyConfig(**raw.get("tradeify", {})),
+                tradeify=TradeifyConfig(**tradeify_raw),
                 browser=BrowserConfig(**raw.get("browser", {})),
                 sync=SyncConfig(**raw.get("sync", {})),
                 storage=StorageConfig(**raw.get("storage", {})),

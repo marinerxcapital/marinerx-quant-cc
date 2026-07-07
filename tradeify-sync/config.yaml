@@ -2,9 +2,9 @@
 # Copy .env.example to .env for credentials (never commit .env).
 
 tradeify:
-  # Replace with your Tradeify dashboard base URL (must be HTTPS).
-  base_url: "https://dashboard.tradeify.example"
-  login_path: "/login"
+  # Tradeify TFD dashboard (override via TRADEIFY_BASE_URL / TRADEIFY_LOGIN_PATH in .env)
+  base_url: "https://app-f.tradeify.co"
+  login_path: "/auth/login"
 
 browser:
   headless: false

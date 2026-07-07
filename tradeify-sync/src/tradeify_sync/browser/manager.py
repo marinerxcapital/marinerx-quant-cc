@@ -7,7 +7,7 @@ from typing import Any
 
 from playwright.async_api import BrowserContext, Page, Playwright, async_playwright
 
-from tradeify_sync.browser.guards import assert_navigable
+from tradeify_sync.browser.guards import assert_navigable, is_same_host_asset
 from tradeify_sync.config import Settings
 from tradeify_sync.utils.logging import get_logger
 
@@ -77,6 +77,9 @@ class BrowserManager:
         async def _route_handler(route: Any) -> None:
             url = route.request.url
             try:
+                if is_same_host_asset(url, self.settings.tradeify.base_url):
+                    await route.continue_()
+                    return
                 assert_navigable(url, self.settings.tradeify.base_url)
                 await route.continue_()
             except Exception:

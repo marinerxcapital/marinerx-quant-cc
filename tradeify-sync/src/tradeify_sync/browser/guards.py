@@ -19,6 +19,7 @@ logger = get_logger(__name__)
 _PATH_PATTERNS = [
     r"^/?$",
     r"^/login",
+    r"^/auth",
     r"^/dashboard",
     r"^/accounts",
     r"^/trades",
@@ -38,6 +39,23 @@ class ElementDescriptor(Protocol):
 
 _ATTR_KEYS = ("aria-label", "name", "id", "value", "type", "title", "data-action")
 
+_ASSET_SUFFIXES = (".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".json", ".map", ".webp")
+_ASSET_PREFIXES = ("/_next/", "/static/", "/assets/", "/fonts/", "/api/", "/favicon", "/images/")
+
+
+def is_same_host_asset(url: str, allowed_base_url: str) -> bool:
+    """Allow static/API subresources from the dashboard host (SPA needs JS bundles)."""
+    parsed = urlparse(url)
+    if parsed.scheme not in ("https", "http"):
+        return False
+    base_host = urlparse(allowed_base_url).netloc.lower()
+    if parsed.netloc.lower() != base_host:
+        return False
+    path = parsed.path.lower()
+    if path.endswith(_ASSET_SUFFIXES):
+        return True
+    return any(path.startswith(prefix) for prefix in _ASSET_PREFIXES)
+
 
 def assert_navigable(url: str, allowed_base_url: str | None = None) -> None:
     """Raise NavigationError unless url matches the allowlist."""
@@ -51,7 +69,10 @@ def assert_navigable(url: str, allowed_base_url: str | None = None) -> None:
         if parsed.netloc.lower() != base_host:
             logger.warning("navigation_denied", url=url, reason="host-mismatch")
             raise NavigationError(f"URL not on allowlist: {url}")
-    elif not parsed.netloc.lower().endswith("tradeify.example"):
+    elif not (
+        parsed.netloc.lower().endswith("tradeify.example")
+        or parsed.netloc.lower().endswith("tradeify.co")
+    ):
         logger.warning("navigation_denied", url=url, reason="unknown-host")
         raise NavigationError(f"URL not on allowlist: {url}")
 
