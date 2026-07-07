@@ -116,6 +116,10 @@ async def _sync_live(
                     new_count = insert_ignore_trades(session, trades)  # type: ignore[arg-type]
                     run.trades_new += new_count
             except Exception as exc:
+                msg = str(exc)
+                if "table_rows" in msg and "trades" in msg:
+                    logger.info("trades_unavailable", account_id=acct.account_id)
+                    continue
                 run.status = SyncStatus.PARTIAL
                 run.errors.append(f"{acct.account_id}: {exc}")
                 logger.error("account_sync_failed", account_id=acct.account_id, error=str(exc))

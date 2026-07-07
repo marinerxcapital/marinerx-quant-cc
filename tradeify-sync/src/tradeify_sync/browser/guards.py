@@ -26,6 +26,9 @@ _PATH_PATTERNS = [
     r"^/history",
     r"^/positions",
     r"^/payouts",
+    r"^/grand-cup",
+    r"^/billing",
+    r"^/journal",
 ]
 
 

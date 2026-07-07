@@ -194,10 +194,10 @@ class Settings(BaseModel):
         """Build a dashboard URL for a page key."""
         paths = {
             "login": self.tradeify.login_path,
-            "dashboard": "/dashboard",
-            "accounts": "/accounts",
-            "trades": "/trades",
-            "positions": "/positions",
+            "dashboard": "/",
+            "accounts": "/",
+            "trades": "/journal/trade-log",
+            "positions": "/",
             "payouts": "/payouts",
         }
         path = paths.get(page_key, f"/{page_key}")
