@@ -1,0 +1,38 @@
+# Tradeify 150K Select Flex configuration
+# Update this file whenever Tradeify changes rules. The engine is intentionally config-driven.
+account:
+  firm: Tradeify
+  program: Select
+  payout_path: Flex_5_Day
+  account_size: 150000
+  starting_balance: 150000
+  profit_split_trader_pct: 0.90
+
+evaluation:
+  profit_target: 9000
+  max_drawdown_eod: 4500
+  daily_loss_limit: null
+  consistency_max_single_day_pct: 0.40
+  max_contracts_mini: 12
+  max_contracts_micro: 120
+  min_trading_days_practical: 3
+
+funded_flex:
+  winning_days_required: 5
+  winning_day_threshold: 250
+  max_payout_gross: 5000
+  payout_formula_profit_pct: 0.50
+  minimum_balance_required: false
+  positive_net_profit_required_after_first_cycle: true
+  drawdown_lock_above_start: 100
+
+marinerx_policy:
+  mode_default: PAPER_FIRST
+  max_risk_per_trade_dollars: 250
+  max_daily_loss_dollars: 750
+  hard_daily_stop_dollars: 900
+  max_drawdown_usage_pct: 0.50
+  emergency_flatten_drawdown_headroom: 1500
+  first_payout_min_profit_before_request: 4500
+  max_payout_profit_target: 10000
+  no_trade_minutes_around_red_news: 5

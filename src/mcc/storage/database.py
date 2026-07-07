@@ -12,6 +12,11 @@ from mcc.storage.models import Base
 _engine: Engine | None = None
 
 
+def _register_all_tables() -> None:
+    """Import optional table modules so SQLAlchemy metadata is complete."""
+    import marinerx_tradeify.persistence  # noqa: F401
+
+
 def get_engine(url: str | None = None) -> Engine:
     global _engine
     if _engine is not None and url is None:
@@ -28,6 +33,7 @@ def get_engine(url: str | None = None) -> Engine:
         engine_kwargs["pool_size"] = settings.database_pool_size
         engine_kwargs["max_overflow"] = settings.database_max_overflow
 
+    _register_all_tables()
     eng = create_engine(db_url, connect_args=connect_args, **engine_kwargs)
     Base.metadata.create_all(eng)
 

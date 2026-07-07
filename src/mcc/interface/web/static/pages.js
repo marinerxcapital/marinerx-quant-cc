@@ -240,6 +240,7 @@ PAGES.risk = function() {
     '<tr><td>CL</td><td class="positive">+1</td><td>1</td><td>1</td></tr><tr><td>GC</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div>';
   return '<div class="page-header"><h1 class="page-title">Risk Command</h1><p class="page-subtitle">Sizing, VaR, expected shortfall, drawdown control, and portfolio exposure.</p></div>' +
     '<div class="card" style="margin-bottom:16px"><div class="card-title">Live Market Context (TradingView)</div><div id="tv-chart-risk" style="height:320px"></div></div>' +
+    '<div class="card" id="tradeify-risk-live" style="margin-bottom:16px"></div>' +
     top + pg + '<div id="risk-exposure-live">' + exp + '</div>';
 };
 
@@ -273,6 +274,7 @@ PAGES.decision = function() {
     '<div style="margin-top:16px;padding:12px;background:var(--mx-bg);border-radius:8px;font-size:12px"><strong>Reasoning:</strong> NQ is approved because validated setup alignment is present, regime indicator confirms trending state, internals remain risk-on, and PropGuardian headroom remains above required threshold.</div>' +
     '<div class="grid-3" style="margin-top:12px;font-size:12px"><div><strong>Recommended Size:</strong> 2 contracts</div><div><strong>Max Risk:</strong> $350</div><div><strong>Invalidation:</strong> break below opening range midpoint</div></div></div>';
   return '<div class="page-header"><h1 class="page-title">Trade-or-No-Trade Decision Center</h1><p class="page-subtitle">Real-time trade eligibility and decision analytics.</p></div>' +
+    '<div id="tradeify-decision-live" style="margin-bottom:16px"></div>' +
     ic +
     '<div class="card" style="margin-bottom:16px"><div class="card-title">Interactive Chart — <span id="decision-tv-symbol">NQ</span> (TradingView)</div><div id="tv-chart-decision"></div></div>' +
     '<div id="decision-detail-live">' + detail + '</div>';
@@ -350,6 +352,7 @@ PAGES.performance = function() {
     '<tr><td>STAND-ASIDE</td><td>63</td><td>—</td><td>$0</td><td>—</td><td>—</td><td>—</td></tr>' +
     '<tr><td><strong>TOTAL</strong></td><td>248</td><td>—</td><td class="positive"><strong>+$9,060</strong></td><td>0.29</td><td>1.42</td><td class="negative">-$2,180</td></tr></tbody></table>';
   return '<div class="page-header"><h1 class="page-title">Performance Analytics</h1><p class="page-subtitle">Paper-simulated performance from live NQ returns (yfinance).</p></div>' +
+    '<div class="card" id="tradeify-payout-live" style="margin-bottom:16px"></div>' +
     '<div class="card" style="margin-bottom:16px"><div class="card-title">Benchmark — NQ Futures (TradingView)</div><div id="tv-chart-performance"></div></div>' +
     '<div class="grid-2" style="margin-bottom:16px"><div class="card"><div class="card-title">Equity Curve &amp; Drawdown</div><div id="perf-stats-live">' + stats + '</div>' +
     '<div id="chart-equity-dd" style="height:280px"></div></div>' +
@@ -410,6 +413,7 @@ PAGES.settings = function() {
     '<tr><td class="mono">2025-05-30 14:30:15 UTC</td><td>ResearchLab</td><td>Paper trading enabled</td><td>' + mxBadge('green','SUCCESS') + '</td></tr>' +
     '<tr><td class="mono">2025-05-30 14:29:41 UTC</td><td>ResearchLab</td><td>Live execution disabled</td><td>' + mxBadge('green','SUCCESS') + '</td></tr></tbody></table>';
   return '<div class="page-header"><h1 class="page-title">Settings &amp; System Control</h1><p class="page-subtitle">System configuration, data feeds, execution controls, and audit.</p></div>' +
+    '<div class="card" id="tradeify-connector-live" style="margin-bottom:16px"></div>' +
     '<div class="grid-2" style="margin-bottom:16px"><div class="card table-wrap"><div class="card-title">Data &amp; Feed Status</div>' + feeds + '</div>' +
     '<div class="card"><div class="card-title">Configuration (Read-Only)</div>' + config + '</div></div>' +
     '<div class="card" style="margin-bottom:16px">' + danger + '</div>' +

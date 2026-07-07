@@ -109,6 +109,7 @@
     if (!window.PAGES || !window.PAGES[page]) page = 'home';
     currentPage = page;
     if (window.TradingViewMX) window.TradingViewMX.reset();
+    if (window.TradeifyData) window.TradeifyData.reset();
     var container = document.getElementById('page-content');
     if (container) container.innerHTML = window.PAGES[page]();
     document.querySelectorAll('.sidebar-nav a').forEach(function (a) {
@@ -117,6 +118,7 @@
     initCharts(page);
     if (page === 'home') pollHealth();
     if (window.LiveData) window.LiveData.hydrate(page);
+    if (window.TradeifyData) window.TradeifyData.hydrate(page);
   }
 
   function updateClock() {
@@ -184,6 +186,8 @@
     connectWS();
     setInterval(pollHealth, 5000);
     if (window.LiveData) window.LiveData.startPolling(function () { return currentPage; });
+    if (window.TradeifyData) window.TradeifyData.startPolling(function () { return currentPage; });
+    window.__mxCurrentPage = function () { return currentPage; };
     var hash = (location.hash || '#home').slice(1);
     navigate(hash || 'home');
     window.addEventListener('hashchange', function () {
