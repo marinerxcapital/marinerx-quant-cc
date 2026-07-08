@@ -87,6 +87,9 @@ def test_agents_market_pulse_endpoint(client, mock_yfinance):
     assert "snapshot" in body
     assert "proxies" in body["snapshot"]
     assert "tick" in body["snapshot"]["proxies"]
+    assert "heatmaps" in body
+    assert "correlation" in body["heatmaps"]
+    assert body["heatmaps"]["correlation"]["rows"] >= 2
 
 
 def test_agents_indicators_endpoint(client, mock_yfinance):

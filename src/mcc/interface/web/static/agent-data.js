@@ -34,55 +34,30 @@
   }
 
   function hydrateHeader(account) {
-    var wrap = document.getElementById('header-metrics-live');
-    if (!wrap) return;
+    /* Header KPIs are owned by system-state.js (/api/system-state). Account sync only fills gaps. */
+    if (!account || account.sync_status !== 'live') return;
 
-    if (!account || account.sync_status !== 'live') {
-      wrap.querySelectorAll('.header-metric-value').forEach(function (el, i) {
-        if (i === 0 || i === 1) {
-          el.textContent = '—';
-          el.className = 'header-metric-value';
-        } else if (i === 2) {
-          el.textContent = 'Awaiting sync';
-          el.className = 'header-metric-value';
-        }
-      });
-      return;
-    }
-
-    var metrics = wrap.querySelectorAll('.header-metric');
+    var metrics = document.querySelectorAll('.header-metric');
     if (metrics[0]) {
       var dayEl = metrics[0].querySelector('.header-metric-value');
-      if (dayEl && account.day_pnl != null) {
+      if (dayEl && dayEl.textContent === '—' && account.day_pnl != null) {
         dayEl.textContent = fmtUsd(account.day_pnl);
         dayEl.className = 'header-metric-value ' + (account.day_pnl >= 0 ? 'positive' : 'negative');
       }
     }
     if (metrics[1]) {
       var weekEl = metrics[1].querySelector('.header-metric-value');
-      if (weekEl) {
-        if (account.week_pnl != null) {
-          weekEl.textContent = fmtUsd(account.week_pnl);
-          weekEl.className = 'header-metric-value ' + (account.week_pnl >= 0 ? 'positive' : 'negative');
-        } else {
-          weekEl.textContent = '—';
-          weekEl.className = 'header-metric-value';
-        }
+      if (weekEl && weekEl.textContent === '—' && account.week_pnl != null) {
+        weekEl.textContent = fmtUsd(account.week_pnl);
+        weekEl.className = 'header-metric-value ' + (account.week_pnl >= 0 ? 'positive' : 'negative');
       }
     }
     if (metrics[2]) {
       var headEl = metrics[2].querySelector('.header-metric-value');
-      if (headEl && account.drawdown_headroom != null) {
+      if (headEl && headEl.textContent === 'Awaiting sync' && account.drawdown_headroom != null) {
         headEl.textContent = '$' + Math.round(account.drawdown_headroom).toLocaleString();
         headEl.className = 'header-metric-value';
       }
-    }
-
-    var statusHdr = document.querySelector('.header-status');
-    if (statusHdr && account.stale) {
-      statusHdr.innerHTML = '<span class="status-dot amber"></span> ACCOUNT DATA STALE';
-    } else if (statusHdr && account.sync_status === 'live') {
-      statusHdr.innerHTML = '<span class="status-dot green"></span> ACCOUNT SYNCED';
     }
   }
 

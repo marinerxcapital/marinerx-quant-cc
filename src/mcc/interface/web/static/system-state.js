@@ -76,9 +76,16 @@
         if (hm.drawdown_headroom != null) {
           headEl.textContent = '$' + Math.round(hm.drawdown_headroom).toLocaleString();
           headEl.className = 'header-metric-value';
+          var tip = [];
+          if (hm.equity != null) tip.push('Equity $' + Math.round(hm.equity).toLocaleString());
+          if (hm.account_id) tip.push(hm.account_id);
+          if (hm.source && hm.source !== 'awaiting_sync') tip.push('Source: ' + hm.source);
+          if (hm.stale) tip.push('(stale)');
+          if (tip.length) headEl.title = tip.join(' · ');
         } else {
           headEl.textContent = 'Awaiting sync';
           headEl.className = 'header-metric-value';
+          headEl.title = hm.message || '';
         }
       }
     }

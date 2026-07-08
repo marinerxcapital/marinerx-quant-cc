@@ -326,21 +326,87 @@ class ExecutionGatewayAgent(BaseAgent):
 
 
 class MarketPulseAgent(BaseAgent):
-    """Subscribe BAR, compute breadth/internals, publish INTERNALS."""
+    """Subscribe BAR + poll free market; breadth, heatmaps, volume profile."""
 
     def __init__(self, name: str, bus: MessageBus, clock: Optional[Clock] = None):
         super().__init__(name, bus, clock)
         self._listener: Optional[asyncio.Task[None]] = None
+        self._poll_task: Optional[asyncio.Task[None]] = None
         self._breadth = BreadthComputer()
+        self._heatmaps: dict[str, dict[str, Any]] = {}
+        self._volume_profiles: dict[str, dict[str, Any]] = {}
+        self._series: dict[str, list[float]] = {"tick": [], "trin": [], "add": [], "breadth": []}
+        self._as_of: str | None = None
+        self._proxy_meta: dict[str, Any] = {}
 
     async def activate(self) -> None:
         await super().activate()
-        if self._listener is None:
-            try:
-                loop = asyncio.get_running_loop()
+        try:
+            loop = asyncio.get_running_loop()
+            if self._listener is None:
                 self._listener = loop.create_task(self._listen())
-            except RuntimeError:
-                pass
+            if self._poll_task is None:
+                self._poll_task = loop.create_task(self._poll_loop())
+        except RuntimeError:
+            pass
+
+    def _record_series(self, state: Any) -> None:
+        for key, attr in (("tick", "tick"), ("trin", "trin"), ("add", "add"), ("breadth", "breadth_score")):
+            val = getattr(state, attr, None)
+            if val is None:
+                continue
+            buf = self._series.setdefault(key, [])
+            buf.append(float(val))
+            if len(buf) > 60:
+                del buf[:-60]
+
+    def _refresh_market_layers(self, symbol: str = "NQ") -> None:
+        from mcc.data.live.free_market import INSTRUMENT_META, get_bars, get_internals_proxy
+        from mcc.heatmaps.correlation import build_correlation_frame
+        from mcc.heatmaps.volatility import build_volatility_frame
+        from mcc.microstructure.volume_profile import build_volume_profile
+
+        proxy = get_internals_proxy()
+        self._proxy_meta = {
+            "proxies": proxy.get("proxies", {}),
+            "vix": proxy.get("vix"),
+            "regime": proxy.get("regime"),
+            "regime_confidence": proxy.get("regime_confidence"),
+            "breadth_score": proxy.get("breadth_score"),
+            "disclaimer": proxy.get("disclaimer"),
+            "source": proxy.get("source", "yfinance_proxy"),
+            "sparklines": proxy.get("sparklines", {}),
+        }
+        self._as_of = proxy.get("as_of")
+
+        symbols = list(INSTRUMENT_META.keys())
+        corr = build_correlation_frame(symbols, get_bars)
+        vol = build_volatility_frame(symbols, get_bars)
+        if corr:
+            self._heatmaps["correlation"] = corr.to_dict()
+        if vol:
+            self._heatmaps["volatility"] = vol.to_dict()
+
+        bars = get_bars(symbol).get("bars") or []
+        profile = build_volume_profile(bars)
+        if profile:
+            self._volume_profiles[symbol] = profile
+
+    async def _poll_loop(self) -> None:
+        try:
+            while True:
+                self.set_status("working", "market pulse poll")
+                state = self._breadth.update_from_free_market()
+                self._record_series(state)
+                self._refresh_market_layers()
+                AgentSnapshotRegistry.set(self.name, self.snapshot())
+                for iev in breadth_to_internals_events(
+                    state, ts_utc=self.clock.now(), source=self.name, symbol="MARKET"
+                ):
+                    await self.emit(iev)
+                await asyncio.sleep(60.0)
+        except asyncio.CancelledError:
+            pass
 
     async def _listen(self) -> None:
         try:
@@ -354,6 +420,8 @@ class MarketPulseAgent(BaseAgent):
                 else:
                     state = self._breadth.update_from_bar(payload)
                 symbol = payload.get("symbol", "NQ")
+                self._record_series(state)
+                self._refresh_market_layers(symbol)
                 AgentSnapshotRegistry.set(self.name, self.snapshot())
                 for iev in breadth_to_internals_events(
                     state, ts_utc=self.clock.now(), source=self.name, symbol=symbol
@@ -363,7 +431,26 @@ class MarketPulseAgent(BaseAgent):
             pass
 
     def snapshot(self) -> dict[str, Any]:
-        return self._breadth.snapshot()
+        base = self._breadth.snapshot()
+        regime = base.get("regime", "neutral")
+        display_regime = regime.upper().replace("_", "-") if isinstance(regime, str) else "NEUTRAL"
+        sparklines = dict(self._proxy_meta.get("sparklines") or {})
+        if not sparklines.get("tick") and self._series.get("tick"):
+            sparklines["tick"] = list(self._series["tick"])
+        if not sparklines.get("trin") and self._series.get("trin"):
+            sparklines["trin"] = list(self._series["trin"])
+        return {
+            **base,
+            **self._proxy_meta,
+            "regime": self._proxy_meta.get("regime") or display_regime,
+            "breadth_score": self._proxy_meta.get("breadth_score") or base.get("breadth_score"),
+            "heatmaps": dict(self._heatmaps),
+            "volume_profiles": dict(self._volume_profiles),
+            "series": {k: list(v) for k, v in self._series.items()},
+            "sparklines": sparklines,
+            "as_of": self._as_of,
+            "buffer_len": base.get("buffer_len", 0),
+        }
 
     async def work(self) -> None:
         self.set_status("idle", "marketpulse listener")

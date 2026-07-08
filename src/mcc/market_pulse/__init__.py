@@ -1,0 +1,1 @@
+"""MarketPulse live snapshot assembly for REST + agent registry."""

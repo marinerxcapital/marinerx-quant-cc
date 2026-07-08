@@ -103,6 +103,23 @@
     }], { paper_bgcolor: '#FFFFFF', margin: { t: 20, r: 20, b: 0, l: 20 }, height: 120 }, { displayModeBar: false });
   }
 
+  function plotHeatmap(id, frame) {
+    var el = document.getElementById(id);
+    if (!el || typeof Plotly === 'undefined' || !frame || !frame.z || !frame.z.length) return;
+    Plotly.newPlot(el, [{
+      z: frame.z,
+      x: frame.x_labels || [],
+      y: frame.y_labels || [],
+      type: 'heatmap',
+      colorscale: [[0, '#EEF0F3'], [0.5, '#93C5FD'], [1, '#1D4ED8']],
+      hoverongaps: false
+    }], {
+      paper_bgcolor: '#FFFFFF', plot_bgcolor: '#FFFFFF',
+      margin: { t: 24, r: 16, b: 40, l: 56 }, height: 280,
+      font: { color: '#5B6270', size: 10 }
+    }, { displayModeBar: false, responsive: true });
+  }
+
   /* ── Market Pulse ─────────────────────────────────────────────── */
   function hydrateMarketPulse() {
     var el = setEl('market-pulse-live', loadingBlock('Loading market pulse…'));
@@ -171,7 +188,32 @@
         instRows = '<tr><td colspan="5" style="text-align:center;color:var(--mx-muted)">No instrument quotes — internals fallback only.</td></tr>';
       }
 
-      var sourceLabel = snapWrap.source === 'live' ? 'LIVE' : (pulse ? 'PROXY' : 'DEGRADED');
+      var heatmaps = (pulseRes.j && pulseRes.j.heatmaps) || (pulse && pulse.heatmaps) || {};
+      var volProfiles = (pulseRes.j && pulseRes.j.volume_profiles) || (pulse && pulse.volume_profiles) || {};
+      var nqProfile = volProfiles.NQ || volProfiles.nq;
+      var heatmapHtml = '';
+      if (heatmaps.correlation || heatmaps.volatility) {
+        heatmapHtml = '<div class="card" style="margin-bottom:16px"><div class="card-title">Live Heatmaps</div><div class="grid-2">';
+        if (heatmaps.correlation) {
+          heatmapHtml += '<div><p style="font-size:11px;color:var(--mx-muted);margin-bottom:8px">Cross-Instrument Correlation</p>' +
+            '<div id="heatmap-correlation-mp"></div></div>';
+        }
+        if (heatmaps.volatility) {
+          heatmapHtml += '<div><p style="font-size:11px;color:var(--mx-muted);margin-bottom:8px">Realized Volatility Surface</p>' +
+            '<div id="heatmap-volatility-mp"></div></div>';
+        }
+        heatmapHtml += '</div></div>';
+      }
+      var profileHtml = '';
+      if (nqProfile && nqProfile.volume_by_price) {
+        profileHtml = '<div class="card" style="margin-bottom:16px"><div class="card-title">NQ Volume Profile</div>' +
+          '<p style="font-size:11px;color:var(--mx-muted);margin-bottom:8px">POC <span class="mono">' + nqProfile.poc +
+          '</span> · VAH <span class="mono">' + nqProfile.vah + '</span> · VAL <span class="mono">' + nqProfile.val + '</span></p>' +
+          '<div id="chart-volume-profile-mp" style="height:200px"></div></div>';
+      }
+
+      var sourceLabel = (pulse && pulse.source) ? String(pulse.source).replace(/_/g, ' ').toUpperCase() :
+        (snapWrap.source === 'live' ? 'LIVE' : 'PROXY');
       var html = banners +
         '<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
         '<div class="card-title">Market Internals</div>' + mxBadge('blue', sourceLabel) + '</div>' + sc +
@@ -179,6 +221,7 @@
         '<p style="margin-top:8px;font-weight:700">Confidence ' + conf + (typeof conf === 'number' ? '%' : '') + '</p>' +
         '<p style="font-size:12px;color:var(--mx-secondary)">Breadth score: <span class="mono">' + breadth + '</span></p></div>' +
         '<div><div id="chart-breadth-gauge-mp" style="height:140px"></div></div></div></div>' +
+        heatmapHtml + profileHtml +
         '<div class="card table-wrap"><div class="card-title">Instrument Snapshot</div>' +
         '<table class="data-table"><thead><tr><th>Symbol</th><th>Name</th><th>Price</th><th>Change</th><th>Decision</th></tr></thead><tbody>' +
         instRows + '</tbody></table></div>';
@@ -191,6 +234,23 @@
         });
       }
       if (typeof breadth === 'number') plotGauge('chart-breadth-gauge-mp', breadth, 100);
+      if (heatmaps.correlation) plotHeatmap('heatmap-correlation-mp', heatmaps.correlation);
+      if (heatmaps.volatility) plotHeatmap('heatmap-volatility-mp', heatmaps.volatility);
+      if (nqProfile && nqProfile.volume_by_price && typeof Plotly !== 'undefined') {
+        var vpEl = document.getElementById('chart-volume-profile-mp');
+        if (vpEl) {
+          Plotly.newPlot(vpEl, [{
+            x: nqProfile.price_labels || [],
+            y: nqProfile.volume_by_price,
+            type: 'bar',
+            marker: { color: '#1D4ED8' }
+          }], {
+            paper_bgcolor: '#FFFFFF', plot_bgcolor: '#FFFFFF',
+            margin: { t: 8, r: 8, b: 32, l: 40 }, height: 200,
+            font: { color: '#5B6270', size: 10 }
+          }, { displayModeBar: false, responsive: true });
+        }
+      }
     }).catch(function () {
       setEl('market-pulse-live', statusBanner('error', 'Request failed', 'Could not reach market pulse APIs.'));
     });

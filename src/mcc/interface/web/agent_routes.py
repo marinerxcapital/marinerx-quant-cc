@@ -8,12 +8,14 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
+from mcc.agents.snapshots import AgentSnapshotRegistry
 from mcc.data.live.free_market import (
     INSTRUMENT_META,
     get_bars,
     get_internals_proxy,
     get_regime_snapshot,
 )
+from mcc.system.header_metrics import build_header_metrics
 from mcc.storage.database import get_engine
 from mcc.storage.models import DecisionLog, ReportMetadata, Strategy, Trade
 from marinerx_tradeify.sync_service import get_sync_service
@@ -304,18 +306,32 @@ def agents_snapshot() -> dict[str, Any]:
     }
 
 
+def _market_pulse_snapshot() -> dict[str, Any]:
+    agent_snap = AgentSnapshotRegistry.get("MarketPulse", {})
+    if agent_snap.get("heatmaps") or (agent_snap.get("as_of") and agent_snap.get("proxies")):
+        return agent_snap
+    from mcc.market_pulse.snapshot import build_live_snapshot
+
+    return build_live_snapshot()
+
+
 @router.get("/agents/market-pulse")
 def market_pulse() -> dict[str, Any]:
     sup = _get_supervisor()
     agent_info = sup.snapshot().agents.get("MarketPulse", {})
-    pulse = get_internals_proxy()
+    pulse = _market_pulse_snapshot()
+    as_of = pulse.get("as_of")
+    live = bool(as_of and not _stale_flag(as_of) and pulse.get("proxies"))
     return {
         "agent": "MarketPulse",
         "status": agent_info.get("status", "unknown"),
         "task": agent_info.get("task"),
         "snapshot": pulse,
-        "sync_status": "live" if pulse.get("as_of") and not _stale_flag(pulse.get("as_of")) else "awaiting_sync",
-        "as_of": pulse.get("as_of"),
+        "heatmaps": pulse.get("heatmaps") or {},
+        "volume_profiles": pulse.get("volume_profiles") or {},
+        "series": pulse.get("series") or {},
+        "sync_status": "live" if live else "awaiting_sync",
+        "as_of": as_of,
     }
 
 
@@ -361,31 +377,41 @@ def journal(limit: int = 50) -> dict[str, Any]:
 
 @router.get("/account/sync")
 def account_sync() -> dict[str, Any]:
+    header = build_header_metrics()
     svc = get_sync_service()
     latest = svc.get_latest()
-    observed_at = latest.get("observed_at")
+    observed_at = header.get("observed_at") or latest.get("observed_at")
     age_sec = _age_seconds(observed_at)
-    stale = _stale_flag(observed_at)
+    stale = bool(header.get("stale")) or _stale_flag(observed_at)
     stale_block = age_sec is not None and age_sec > STALE_BLOCK_SEC
 
     snap = latest.get("snapshot") or {}
-    equity = snap.get("balance") if snap.get("balance") is not None else snap.get("equity")
+    equity = header.get("equity") if header.get("equity") is not None else (
+        snap.get("balance") if snap.get("balance") is not None else snap.get("equity")
+    )
     drawdown = snap.get("drawdown")
-    headroom = snap.get("drawdown_headroom")
-    if headroom is None and snap.get("balance") is not None and snap.get("eod_drawdown_floor") is not None:
-        headroom = float(snap["balance"]) - float(snap["eod_drawdown_floor"])
+    headroom = header.get("drawdown_headroom")
+    if headroom is None:
+        headroom = snap.get("drawdown_headroom")
+        if headroom is None and snap.get("balance") is not None and snap.get("eod_drawdown_floor") is not None:
+            headroom = float(snap["balance"]) - float(snap["eod_drawdown_floor"])
 
-    day_pnl = snap.get("realized_day_pnl")
-    week_pnl = snap.get("week_pnl") or snap.get("realized_week_pnl")
+    day_pnl = header.get("day_pnl") if header.get("day_pnl") is not None else snap.get("realized_day_pnl")
+    week_pnl = header.get("week_pnl") if header.get("week_pnl") is not None else (
+        snap.get("week_pnl") or snap.get("realized_week_pnl")
+    )
 
     reconciliation = latest.get("reconciliation") or {}
+    has_data = header.get("source") != "awaiting_sync" or equity is not None or headroom is not None
     return {
-        "status": latest.get("status", "not_available"),
+        "status": latest.get("status", "ok" if has_data else "not_available"),
         "stale": stale,
         "stale_block": stale_block,
         "age_seconds": age_sec,
         "observed_at": observed_at,
         "equity": equity,
+        "balance": header.get("balance"),
+        "account_id": header.get("account_id"),
         "drawdown": drawdown,
         "drawdown_headroom": headroom,
         "day_pnl": day_pnl,
@@ -393,6 +419,7 @@ def account_sync() -> dict[str, Any]:
         "safe_default": latest.get("safe_default", "BLOCK_NEW_TRADES"),
         "reconciliation_ok": reconciliation.get("ok"),
         "block_trades": reconciliation.get("block_trades", True),
-        "message": latest.get("message"),
-        "sync_status": "live" if not stale and equity is not None else "awaiting_sync",
+        "message": header.get("message") or latest.get("message"),
+        "source": header.get("source"),
+        "sync_status": "live" if has_data else "awaiting_sync",
     }

@@ -43,12 +43,7 @@
   function initCharts(page) {
     if (typeof Plotly === 'undefined') return;
     setTimeout(function () {
-      if (page === 'market-pulse') {
-        ['chart-tick', 'chart-trin', 'chart-add', 'chart-vold', 'chart-vix'].forEach(function (id) { sparkline(id); });
-        gauge('chart-breadth-gauge', 62, 100);
-        var vixEl = document.getElementById('chart-vix-term');
-        if (vixEl) Plotly.newPlot(vixEl, [{ x: ['Spot', '1M', '3M', '6M', '9M', '1Y'], y: [14.62, 15.38, 16.42, 17.89, 18.86, 20.41], type: 'scatter', mode: 'lines+markers', line: { color: '#1D4ED8' } }], plotlyLayout, plotlyConfig);
-      }
+      /* market-pulse charts hydrated by tier2-data.js from /api/agents/market-pulse — no mock sparklines */
       if (page === 'indicators') {
         var cEl = document.getElementById('chart-nq-candlestick');
         if (cEl) {

@@ -1,0 +1,1 @@
+"""Live heatmap frames for MarketPulse (Phase 03 schema)."""

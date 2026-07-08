@@ -10,6 +10,7 @@ from mcc.core.config import MCCSettings, get_settings
 from mcc.data.live import free_market
 from mcc.storage.database import check_database_connectivity
 from mcc.storage.object_store import get_object_store
+from mcc.system.header_metrics import build_header_metrics
 
 SystemStatusLabel = Literal["NOMINAL", "STALE", "DEGRADED", "LOCKED"]
 
@@ -263,13 +264,7 @@ def build_system_state(settings: MCCSettings | None = None) -> dict[str, Any]:
             idle += 1
 
     account = freshness["sources"]["account_sync"]
-    header_pnl = {
-        "day_pnl": None,
-        "week_pnl": None,
-        "drawdown_headroom": None,
-        "source": "awaiting_sync",
-        "labeled": True,
-    }
+    header_pnl = build_header_metrics()
 
     return {
         "status": status_label,

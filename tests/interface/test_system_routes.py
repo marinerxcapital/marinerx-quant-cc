@@ -83,7 +83,29 @@ def test_config_check_endpoint(client, memory_db):
         assert check["level"] in ("REQUIRED", "OPTIONAL")
 
 
-def test_system_state_endpoint(client, memory_db, mock_yfinance):
+def test_system_state_endpoint(client, memory_db, mock_yfinance, tmp_path, monkeypatch):
+    import sqlite3
+    from datetime import datetime, timezone
+
+    db_path = tmp_path / "tradeify_sync.db"
+    conn = sqlite3.connect(str(db_path))
+    conn.execute(
+        """
+        CREATE TABLE accounts (
+            account_id TEXT PRIMARY KEY, balance TEXT, equity TEXT,
+            drawdown_headroom TEXT, daily_pnl TEXT, last_synced_utc TEXT, phase TEXT, status TEXT
+        )
+        """
+    )
+    now = datetime.now(timezone.utc).isoformat()
+    conn.execute(
+        "INSERT INTO accounts VALUES (?,?,?,?,?,?,?,?)",
+        ("acct-test", "151242.40", "151242.40", "4500.00", "125.50", now, "EVAL", "active"),
+    )
+    conn.commit()
+    conn.close()
+    monkeypatch.setenv("TRADEIFY_SYNC_DB_PATH", str(db_path))
+
     free_market.get_market_snapshot()
     r = client.get("/api/system-state")
     assert r.status_code == 200
@@ -91,7 +113,10 @@ def test_system_state_endpoint(client, memory_db, mock_yfinance):
     assert body["status"] in ("NOMINAL", "STALE", "DEGRADED", "LOCKED")
     assert "agents" in body
     assert body["agents"]["count"] == 15
-    assert body["header_metrics"]["day_pnl"] is None
+    hm = body["header_metrics"]
+    assert hm["source"] == "tradeify_sync_db"
+    assert hm["drawdown_headroom"] == 4500.0
+    assert hm["day_pnl"] == 125.5
     assert body["status_detail"]["live_execution_enabled"] is False
 
 
